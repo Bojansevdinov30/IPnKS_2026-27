@@ -1,0 +1,32 @@
+<!--Да се направи веб страница каде од тастатура (преку prompt) се чита мобилен број во следниот
+формат XXYYYZZZ (пр. 71298486). Програмата треба да го испечати во формат XXX/YYY-ZZZ (пр.
+071/298-486). Дополнително, треба да го испечати и името на операторот. (070/071/072 - T-mobile,
+075/076 – One, 077/078 – Vip).-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2</title>
+</head>
+<body>
+<script>
+    let str = prompt();
+
+    let first = str.substring(0, 3);
+    let second = str.substring(3, 6);
+    let third = str.substring(6, 9);
+
+    let operator;
+
+    if (['0', '1', '2'].includes(first[2])) {
+        operator = "T-mobile";
+    } else if (['5', '6'].includes(first[2])) {
+        operator = "One";
+    } else if (['7', '8'].includes(first[2])) {
+        operator = "Vip";
+    }
+
+    alert(first + "/" + second + "-" + third + "\nOperator: " + operator);
+</script>
+</body>
+</html>

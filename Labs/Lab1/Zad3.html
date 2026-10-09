@@ -1,0 +1,28 @@
+<!--Да се направи веб страница каде од тастатура (преку prompt) ќе се внесат стринг. Програмата треба
+да го испечати најдолгиот збор во рамките на стрингот.
+Пример
+Влез: Прва лабораториска вежба
+Излез: лабораториска-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3</title>
+</head>
+<body>
+<script>
+    let str = prompt();
+    let parts = str.split(" ");
+    // str = str.split(/\s+/g);
+    let len = 0;
+    let result = "";
+    for (let part of parts) {
+        if (part.length > len) {
+            result = part;
+            len = part.length;
+        }
+    }
+    alert(result);
+</script>
+</body>
+</html>

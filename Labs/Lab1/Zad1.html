@@ -1,0 +1,59 @@
+<!--Да се направи веб страница која за трицифрен број внесен од тастатура (преку prompt) ќе провери
+дали е палиндром и ќе испечати соодветна порака на екран. Доколку внесениот број не е
+трицифрен треба да се испечати порака дека не може да се провери внесениот број.-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>1</title>
+
+    <script>
+        let str = prompt();
+
+        if (isNaN(parseInt(str))) {
+            alert("Not a number")
+        } else if (str.length !== 3) {
+            alert("Not 3 digits long")
+        } else {
+            if (str[0] === str[2]) {
+                alert("Palindrome");
+            } else {
+                alert("Not a palindrome");
+            }
+        }
+    </script>
+</head>
+<body>
+
+</body>
+<!--<body id="body">-->
+<!--<input type="text" id="input"> Please enter a number-->
+<!--<button type="submit" id="btn">Submit</button>-->
+
+<!--<p id="result"></p>-->
+
+<!--<script>-->
+<!--    let btn = document.getElementById("btn");-->
+<!--    let result = document.getElementById("result");-->
+
+<!--    btn.addEventListener("click", event => {-->
+<!--        let str = document.getElementById("input").value;-->
+
+<!--        if (isNaN(Number(str))) {-->
+<!--            result.textContent = "Not a number";-->
+<!--        }-->
+<!--        else if (str.length !== 3) {-->
+<!--            result.textContent = "Not a 3 digit number";-->
+<!--        }-->
+<!--        else {-->
+<!--            if (str[0] === str[2]) {-->
+<!--                result.textContent = "Palindrome!";-->
+<!--            }-->
+<!--            else {-->
+<!--                result.textContent = "Not a palindrome!";-->
+<!--            }-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
+<!--</body>-->
+</html>

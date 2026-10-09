@@ -1,0 +1,32 @@
+<!--Да се направи веб страница каде од тастатура (преку prompt) ќе се внесат 3 броеви. Програмата
+треба да го испечати знакот на производот.
+Пример
+Влез: 3, -7, 2
+Излез: Знакот е --->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>4</title>
+</head>
+<body>
+<script>
+    let str = prompt();
+    str = str.split(", ");
+
+    let p = 1;
+
+    for (let i of str) {
+        p *= parseInt(i);
+    }
+
+    if (p > 0) {
+        alert("+");
+    } else if (p < 0) {
+        alert("-");
+    } else {
+        alert("0");
+    }
+</script>
+</body>
+</html>
