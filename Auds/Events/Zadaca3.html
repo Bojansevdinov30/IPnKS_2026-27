@@ -1,0 +1,31 @@
+<!--Задача 3-->
+<!-- Напишете ја функцијата getAttributes () која во конзола ќе ги-->
+<!--испечати href, hreflang, rel, target, и type атрибутите на линкот-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8/>
+    <script>
+        function getAttributes() {
+            var u = document.getElementById("finki").href;
+            console.log('The value of the href attribute of the link is : ' + u);
+            var v = document.getElementById("finki").hreflang;
+            console.log('The value of the hreflang attribute of the link is : ' + v);
+            var w = document.getElementById("finki").rel;
+            console.log('The value of the rel attribute of the link is : ' + w);
+            var x = document.getElementById("finki").target;
+            console.log('The value of the taget attribute of the link is : ' + x);
+            var y = document.getElementById("finki").type;
+            console.log('The value of the type attribute of the link is : ' + y);
+        }
+    </script>
+</head>
+<body>
+<p><a id="finki" type="text/html" hreflang="en-
+us" rel="nofollow" target="_self" href="http://www.w3
+resource.com/">finki</a></p>
+<button onclick="getAttributes()">Click here to get
+    attributes value
+</button>
+</body>
+</html>

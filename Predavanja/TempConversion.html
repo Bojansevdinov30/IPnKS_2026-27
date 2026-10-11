@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Temperature conversion</title>
+    <script type="text/javascript">
+        function convTempF2C(tempInF) {
+            return 5 / 9 * (tempInF - 32);
+        }
+
+        function convTempC2F(tempInC) {
+            return 9 * tempInC / 5 + 32;
+        }
+    </script>
+</head>
+<body>
+<h2>Convert temperature</h2>
+<form>
+    <h3>Fahrenheit <input name="tempF" type="text" onkeyup="tempC.value = convTempF2C(this.value);">
+        Celsius <input name="tempC" type="text" onkeyup="tempF.value = convTempC2F(this.value);">
+    </h3>
+</form>
+</body>
+</html>

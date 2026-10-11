@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fundamentals</title>
+</head>
+<body>
+    <script src = "../index.js">
+        alert(1); // ignorirano bidejki ima src gore
+        alert(2) // tehnicki i vaka bi rabotelo bez ;
+        alert(3
+            + 2 +
+            1);
+    </script>
+    <script>
+        let user = 'John';
+        let age = 20;
+        let message = 'Hello';
+        alert(1 / 0); // Infinity
+        alert("not a number" / 1); // NaN
+        alert(Infinity); // Infinity
+        alert(NaN + 1); // NaN
+        const bigInt = 1234567890n;
+        alert(bigInt);
+        alert(`Hello, ${user}`);
+        let a;
+        alert(a); // undefined
+        alert(typeof 0); // "number"
+        let result = prompt("Are you sure?", "yes"); // yes is default
+        alert(result);
+        let isBoss = confirm("Are you a boss?");
+        alert(isBoss); // true if pressed ok, otherwise false
+    </script>
+
+    <script type="text/javascript">
+        x = 5 + 5;
+        console.log(x); // 10
+        y = "5" + 5;
+        console.log(y); // 55
+        z = "Hello" + 5;
+        console.log(z); // Hello5
+        let w = "5" - 3;
+        console.log(w); // 2
+        // !!! VAZNO !!!
+        var person = {fname:"John", lname:"Doe", age:25};
+        var text = "";
+        var x;
+        for (x in person) { // IN TI GI DAVA INDEKSITE, OF SE KORISTI ZA VO NIZA
+            text += person[x];
+        }
+
+        let numbers = [1, 2, 3];
+
+        console.log(numbers instanceof Array); // true
+        console.log(numbers instanceof Object); // true, Arrays are objects
+    </script>
+</body>
+</html>

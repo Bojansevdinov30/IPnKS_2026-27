@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form</title>
+    <script>
+        function check(obj) {
+            let name = obj.name;
+            let value = obj.value;
+            switch (name) {
+                case "yourname":
+                    if (!isValidName(value)) {
+                        alert(value + " is not a valid name.");
+                        obj.value = "";
+                    }
+                    break;
+                case "age":
+                    if (!(value > 0 && value < 150)) {
+                        alert(value + " is not a valid age.");
+                        obj.value = "";
+                    }
+                    break;
+            }
+        }
+        function submitForm() {
+            let name = document.exampleform.yourname.value;
+            let age = document.exampleform.age.value;
+            let gender = getGender();
+            let colour = document.exampleform.colours.value;
+            let hobbies = getHobby();
+            let msg = "<h2>Thank you!</h2>";
+            msg += "<h4>Name: " + name + "<br>";
+            msg += "Age: " + age + "<br>";
+            msg += "Favourite colour: " + colour + "<br>";
+            msg += "Hobbies: " + hobbies + "</h4>";
+            displayMessage(msg);
+        }
+        function getGender() {
+            let gender = document.exampleform.gender;
+            if (gender[0].checked) {
+                return "Male";
+            } else {
+                return "Female";
+            }
+        }
+        function getHobby() {
+            let hobbies = "";
+            let obj = document.exampleform
+            if ( obj.jogging.checked ) hobbies += "Jogging ";
+            if ( obj.football.checked ) hobbies += "Football ";
+            if ( obj.reading.checked ) hobbies += "Reading ";
+            if ( hobbies.length === 0 ) hobbies = "None";
+            return hobbies;
+        }
+        function displayMessage(msg) {
+// open a new window
+            let msgWindow = window.open('', 'Message');
+// write msg
+            msgWindow.document.write(msg);
+// raise this window, in case it's not visible
+            msgWindow.focus();
+        }
+        function isValidName(str) {
+            let invalid = /^[a-zA-Z]+$/;
+            return invalid.test(str);
+        }
+    </script>
+</head>
+<body>
+<h1>About yourself</h1>
+<form name=“exampleform”>
+    <h3>Name: <input name="yourname" type="text"
+                     onchange='check(this);'></h3>
+    <h3>Age: <input name="age" type="text"
+                    onchange='check(this);'>
+    </h3>
+    <h3>Gender:
+        <input name=“gender" type="radio" value="male"> Male
+        <input name=“gender" type="radio" value="female"> Female
+    </h3>
+    <h3>Your favourite colour:
+        <select name="colours">
+            <option value="None">
+            <option value="red">Red
+            <option value=“green">Green
+            <option value="blue">Blue
+            <option value="pink">Pink
+        </select>
+    </h3>
+    <h3>Your hobbies are: <br>
+        <input name="jogging" type="checkbox"> Jogging <br>
+        <input name="football" type="checkbox"> Football <br>
+        <input name="reading" type="checkbox"> Reading
+    </h3>
+    <p>
+        <input type="reset" value="Clear">
+        <input type="button" value="Submit" onclick="submitForm();">
+    </p>
+</form>
+</body>
+</html>

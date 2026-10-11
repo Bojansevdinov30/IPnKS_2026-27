@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    // Ova smee
+    document.writeln("<h1>Square the numbers from 1 to 10</h1>");
+    // square the numbers from 1 to 10
+    for (let x = 1; x <= 10; ++x)
+        document.writeln("<p>The square of " + x + " is " + square(x) + "</p>");
+    // The following square function definition’s body is executed
+    // only when the function is called explicitly
+    function square(y) {
+        return y * y;
+    } // end function
+
+    // Ova ne smee
+    sayHello();
+
+    const sayHello = function () {
+        console.log("Hello!");
+    };
+
+    let data = [10, 2, 30, 4];
+
+    data.sort();
+
+    console.log(data); // [10, 2, 30, 4]
+
+    data.sort(function (a, b) {
+        return a - b;
+    });
+
+    console.log(data); // [2, 4, 10, 30]
+
+    // Immediately Invoked Function Expression (IIFE)
+    var tensquared = (function (x) {
+        return x * x;
+    }(10)); // moze ) da odi i pred (10)
+</script>
+
+<script>
+    let color = "blue";
+    // Global scope:
+    // color = "blue"
+
+    function changeColor() {
+        let anotherColor = "red";
+        // changeColor scope:
+        // color = "blue"       (from global scope)
+        // anotherColor = "red"
+
+        function swapColors() {
+            let tempColor = anotherColor;
+            // swapColors scope:
+            // tempColor = "red"
+            //
+            // changeColor scope:
+            // anotherColor = "red"
+            //
+            // global scope:
+            // color = "blue"
+
+            anotherColor = color;
+            // swapColors scope:
+            // tempColor = "red"
+            //
+            // changeColor scope:
+            // anotherColor = "blue"
+            //
+            // global scope:
+            // color = "blue"
+
+            color = tempColor;
+            // swapColors scope:
+            // tempColor = "red"
+            //
+            // changeColor scope:
+            // anotherColor = "blue"
+            //
+            // global scope:
+            // color = "red"
+        }
+
+        swapColors();
+        // After swapColors() finishes:
+        // tempColor no longer exists
+        //
+        // changeColor scope:
+        // anotherColor = "blue"
+        //
+        // global scope:
+        // color = "red"
+    }
+
+    // Before calling changeColor():
+    // global: color = "blue"
+
+    changeColor();
+
+    // After changeColor() finishes:
+    // changeColor's anotherColor no longer exists
+    // swapColors' tempColor no longer exists
+    //
+    // Global scope:
+    // color = "red"
+</script>
+
+<script>
+    function printform(name, address, phoneNum, spouseName, ...childName) {
+// An unlimited number of children can be provided
+        with (document) {
+            write("Name: " + name + "<br>");
+            write("Spouse: " + spouseName + "<br>");
+            write("Address: " + address + "<br>");
+            write("Phone: " + phoneNum + "<br>");
+            for (child in childName) {
+                write("Child " + childName[child] + "<br>");
+            }
+        }
+        return;
+    }
+</script>
+<script>
+    loadScript('/my/script.js', function() {
+// the callback runs after the script is loaded
+        newFunction = () => {
+            return true;
+        } // so now it works
+    // ...
+    });
+</script>
+</body>
+</html>

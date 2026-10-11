@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vezbi</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        form {
+            background-color: lightgray;
+            border: 5px solid purple;
+            margin: auto 10px;
+            padding: 20px;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function submitForm() {
+            let name = document.exercise.your_name.value;
+            let age = document.exercise.your_age.value;
+            let gender = getGender();
+            let colour = document.exercise.colours.value;
+            let hobbies = getHobby();
+            let msg = "<h2>Thank you!</h2>";
+            msg += "<h4>Name: " + name + "<br>";
+            msg += "Age: " + age + "<br>";
+            msg += "Favourite colour: " + colour + "<br>";
+            msg += "Hobbies: " + hobbies + "</h4>";
+            displayMessage(msg);
+        }
+
+        function getGender() {
+            let gender = document.exercise.gender;
+            if (gender[0].checked) {
+                return "Male";
+            } else {
+                return "Female";
+            }
+        }
+
+        function displayMessage(msg) {
+        // open a new window
+            let msgWindow = window.open('', 'Message');
+        // write msg
+            msgWindow.document.write(msg);
+        // raise this window, in case it's not visible
+            msgWindow.focus();
+        }
+
+        function getHobby() {
+            let hobbies = "";
+            let obj = document.exercise;
+            if (obj.Jogging.checked) hobbies += "Jogging ";
+            if (obj.Football.checked) hobbies += "Football ";
+            if (obj.Reading.checked) hobbies += "Reading ";
+            if (hobbies.length === 0) hobbies = "None";
+            return hobbies;
+        }
+
+        function validate(object) {
+            let id = object.id;
+            let value = object.value;
+            switch (id) {
+                case "your_name":
+                    if (!isValidName(value)) {
+                        alert(value + " is not a valid name.");
+                        obj.value = "";
+                    }
+                    break;
+                case "your_age":
+                    if (!(value > 0 && value < 150)) {
+                        alert(value + " is not a valid age.");
+                        obj.value = "";
+                    }
+                    break;
+            }
+        }
+
+        function isValidName(value) {
+            let invalid = /^[a-zA-Z]+$/;
+            return invalid.test(value);
+        }
+    </script>
+</head>
+<body>
+<form name="exercise">
+    <h1>About yourself</h1>
+    <h2>
+        <label for="your_name">Name: <input name="your_name" id="your_name" type="text"
+                                            onchange="validate(this)"></label>
+        <label for="your_age">Age: <input name="your_age" id="your_age" type="text" onchange="validate(this)"></label>
+    </h2>
+    <h2>
+        <label>Gender: <input type="radio" name="gender" value="male">Male
+            <input type="radio" name="gender" value="female">Female
+        </label>
+    </h2>
+    <h2>
+        <label>Your favorite color: <select name="colours">
+            <option value="None"></option>
+            <option value="blue">Blue</option>
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+        </select></label>
+    </h2>
+    <h2>
+        <label>Your hobbies: <br>
+            <input type="checkbox" name="Jogging"> Jogging <br>
+            <input type="checkbox" name="Football"> Football <br>
+            <input type="checkbox" name="Reading"> Reading
+        </label>
+    </h2>
+    <input type="submit" value="Submit" onclick="submitForm()">
+    <input type="reset" value="Reset">
+</form>
+</body>
+</html>

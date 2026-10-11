@@ -1,0 +1,46 @@
+<!--Задача 5-->
+<!-- Напишете програма во JavaScript која ќе поставува зелена боја-->
+<!--на болдираниот текст кога покажувачот е над линкот.-->
+<!--[On mouse over here bold words of the following paragraph will be highlighted]-->
+<!--We have just started this section for the users (beginner to intermediate) who want to work-->
+<!--with various JavaScript problems and write scripts online to test their JavaScript skill.-->
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Get And Style All Tags</title>
+    <script>
+        //First create a list of all bold items
+        var boldItems;
+        window.onload = getBoldItems();
+
+        // Collect all <strong> tags
+        function getBoldItems() {
+            boldItems = document.getElementsByTagName('strong');
+        }
+
+        // iterate all bold tags and change color
+        function highlight() {
+            for (var i = 0; i < bold_Items.length; i++) {
+                boldItems[i].style.color = "green";
+            }
+        }
+
+        // On mouse out highlighted words become black
+        function returnToNormal() {
+            for (var i = 0; i < bold_Items.length; i++) {
+                boldItems[i].style.color = "black";
+            }
+        }
+    </script>
+</head>
+<body>
+<p>[<a href="#" onMouseOver="highlight()" onMouseOut="returnToNormal()">On mouse over here bold words of the following
+    paragraph will be highlighted</a>]</p>
+<p><strong>We</strong> have just started <strong>this</strong> section for the users
+    (<strong>beginner</strong> to intermediate) who <strong>want</strong> to work with <strong>
+        various</strong> JavaScript <strong>problems </strong> and write scripts online to
+    <strong>test</strong> their JavaScript <strong>skill</strong>.
+</p>
+</body>
+</html>
