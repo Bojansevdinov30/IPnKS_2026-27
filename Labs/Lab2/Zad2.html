@@ -1,0 +1,35 @@
+<!--Да се направи веб страница каде при клик на копче на страницата ќе се прикаже слика, која се-->
+<!--избира по случаен избор од дадените слики:-->
+<!--http://data.whicdn.com/images/15145864/large.jpg-->
+<!--https://cdn0.vox-cdn.com/uploads/chorus_image/image/48151611/8559004265_4b81d299ce.0.0.jpg-->
+<!--https://farm5.staticflickr.com/4060/4567292488_5d3f4b05f6_z.jpg-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function randomImage(){
+            let s1 = "http://data.whicdn.com/images/15145864/large.jpg";
+            let s2 = "https://cdn0.vox-cdn.com/uploads/chorus_image/image/48151611/8559004265_4b81d299ce.0.0.jpg";
+            let s3 = "https://farm5.staticflickr.com/4060/4567292488_5d3f4b05f6_z.jpg";
+            let number = Math.floor(Math.random() * 3 + 1);
+            console.log(number);
+            let image = document.getElementById("image");
+            if(number === 1){
+                image.src = s1;
+            }else if(number === 2){
+                image.src = s2;
+            }else if(number === 3){
+                image.src = s3;
+            }
+        }
+    </script>
+</head>
+<body>
+    <img id="image" alt="this is an image" src="">
+    <button onclick="randomImage()">Click me for a random image</button>
+
+
+</body>
+</html>
