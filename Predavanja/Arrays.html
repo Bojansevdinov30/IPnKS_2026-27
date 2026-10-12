@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    let a = [42, 10];
+    a[10] = 5;
+    a;                // [42,10,,,,,,,,,5]
+    typeof(a[6]);     // undefined
+    let myArray = new Array(5);
+    myArray[10] = 3;
+    myArray.sort(function(a, b) {
+        return a - b;
+    });
+    myArray.reverse();
+    myArray.push("something");
+    myArray.pop();
+    myArray.toString();
+    let a = ["Stef", "Jay"];
+
+    a.push("Bob");
+    a.unshift("Kelly");
+    a.pop();
+    a.shift();
+    a.sort();
+    let s = "quick brown fox";
+
+    let a = s.split(" ");
+    a.reverse();
+
+    s = a.join("!");
+
+    let ducks = ["Huey", "Dewey", "Louie"];
+
+    for (x of ducks) {
+        console.log(x);
+    }
+
+    let ducks = ["Huey", "Dewey", "Louie"];
+
+    for (x in ducks) {
+        print(x);
+    }
+
+    let matrix = [
+        [10, 15, 20, 25],
+        [30, 35, 40, 45],
+        [50, 55, 60, 65]
+    ];
+
+    matrix[2][1];      // 55
+    matrix.length;     // 3
+    matrix[1].length;  // 4
+
+    let arr = ["I", "study", "JavaScript"];
+
+    arr.splice(1, 1);
+
+    alert(arr); // ["I", "JavaScript"]
+
+    let arr = ["t", "e", "s", "t"];
+
+    alert(arr.slice(1, 3)); // e,s
+
+    alert(arr.slice(-2));   // s,t
+
+    let arr = [1, 2];
+
+    alert(arr.concat([3, 4]));
+
+    alert(arr.concat([3, 4], [5, 6]));
+
+    alert(arr.concat([3, 4], 5, 6));
+
+    ["Bilbo", "Gandalf", "Nazgul"].forEach(
+        (item, index, array) => {
+            alert(`${item} is at index ${index} in ${array}`);
+        }
+    );
+
+
+    let arr = [1, 0, false];
+
+    alert(arr.indexOf(0));      // 1
+    alert(arr.indexOf(false));  // 2
+    alert(arr.indexOf(null));   // -1
+
+    alert(arr.includes(1));     // true
+
+    let result = arr.find(function(item, index, array) {
+        // return true when found
+    });
+
+    // VAZNO, OVA SE NADOLE E MNOGU VAZNO ZA PONATAMU//
+    let points = [12, 30, 70, 10, 90, 30];
+
+    let passed = points.filter(
+        item => item >= 50
+    );
+
+    console.log(passed); // [70, 90]
+
+    let lengths = ["Bilbo", "Gandalf", "Nazgul"]
+        .map(item => item.length);
+
+    alert(lengths); // 5,7,6
+
+    let arr = [1, 2, 3, 4, 5];
+
+    let result = arr.reduce(
+        (sum, current) => sum + current,
+        0
+    );
+
+    alert(result); // 15
+
+    let arr = ["Bilbo", "Gandalf", "Nazgul"];
+
+    arr.with(1, "Sauron");
+
+    alert(arr);
+
+    let map = new Map();
+
+    map.set('1', 'str1');
+    map.set(1, 'num1');
+    map.set(true, 'bool1');
+
+    alert(map.get(1));
+    alert(map.get('1'));
+
+    alert(map.size);
+
+    let recipeMap = new Map([
+        ['cucumber', 500],
+        ['tomatoes', 350],
+        ['onion', 50]
+    ]);
+
+    for (let vegetable of recipeMap.keys()) {
+        alert(vegetable);
+    }
+
+    for (let amount of recipeMap.values()) {
+        alert(amount);
+    }
+
+    for (let entry of recipeMap) {
+        alert(entry);
+    }
+
+    let set = new Set();
+
+    let john = { name: "John" };
+    let pete = { name: "Pete" };
+    let mary = { name: "Mary" };
+
+    set.add(john);
+    set.add(pete);
+    set.add(mary);
+
+    set.add(john);
+    set.add(mary);
+
+    alert(set.size); // 3
+
+    let set = new Set(["oranges", "apples", "bananas"]);
+
+    for (let value of set) {
+        alert(value);
+    }
+
+    let set = new Set(["oranges", "apples", "bananas"]);
+
+    set.forEach((value, valueAgain, set) => {
+        alert(value);
+    });
+
+    let set = new Set();
+
+    set.add("apple");
+    set.add("banana");
+
+    set.has("apple");     // true
+
+    set.delete("banana");
+
+    set.size;             // 1
+
+    set.clear();
+
+    let arr = ["Hare", "Krishna", "Hare", "Krishna"];
+
+    let set = new Set(arr);
+
+    alert(set.size); // 2
+    let values = [...set];
+</script>
+</body>
+</html>

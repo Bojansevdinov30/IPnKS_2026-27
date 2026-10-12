@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    /*Задача 1
+◼ Напишете JavaScript функција која како аргумент прима поле и
+параметар n, а како резултат ги враќа првите n елементи од
+полето*/
+    first = function(array, n) {
+        if (array == null)
+            return void 0;
+        if (n == null)
+            return array[0];
+        if (n < 0)
+            return [];
+        return array.slice(0, n);
+    };
+    console.log(first([7, 9, 0, -2]));
+    console.log(first([],3));
+    console.log(first([7, 9, 0, -2],3));
+    console.log(first([7, 9, 0, -2],6));
+</script>
+<script>
+    /*Задача 2
+◼ Напишете JavaScript код кој ќе ги спои сите елементи во еден
+стринг*/
+    myColor = ["Red", "Green", "White", "Black"];
+    console.log(myColor.toString());
+    console.log(myColor.join());
+    console.log(myColor.join("+"));
+</script>
+<script>
+    /*Задача 3
+◼ Напишете JavaScript код кој прима број како влез и вметнува „-“
+помеѓу секои два парни броеви.
+14
+Влез:
+025468
+Излез :
+0-254-6-8*/
+    let num = window.prompt();
+    let str = num.toString();
+    let result = [str[0]];
+    for(let x=1; x<str.length; x++) {
+        if((str[x-1]%2 === 0)&&(str[x]%2 === 0)) {
+            result.push('-', str[x]);
+        } else {
+            result.push(str[x]);
+        }
+    }
+    console.log(result.join(''));
+</script>
+<script>
+    /*Задача 4
+◼ Напишете функција во JavaScript која како аргументи прима две
+полиња, а како резултат враќа унија од двете полиња*/
+    function union2(arr1, arr2) {
+        // The ... syntax is called the spread syntax. It expands the elements of an iterable, such as an array or Set.
+        return [...new Set([...arr1, ...arr2])];
+    }
+
+    console.log(union([1, 2, 3], [100, 2, 1, 10]));
+    function union(arra1, arra2) {
+        if ((arra1 == null) || (arra2==null))
+            return void 0;
+        let obj = {};
+        for (let i = arra1.length-1; i >= 0; -- i)
+            obj[arra1[i]] = arra1[i];
+        for (let i = arra2.length-1; i >= 0; -- i)
+            obj[arra2[i]] = arra2[i];
+        let res = [];
+        for (let n in obj) {
+            if (obj.hasOwnProperty(n))
+                res.push(obj[n]);
+        }
+        return res;
+    }
+    console.log(union([1, 2, 3], [100, 2, 1, 10]));
+</script>
+<script>
+    /*Задача 7
+◼ Да се напише функција која ќе
+пополнува низа со вредности (број и
+карактер) според дадени параметри
+◼ Пример
+console.log(num_string_range('a', "z", 2));
+["a", "c", "e", "g", "i", "k", "m", "o", "q", "s", "u", "w", "y"]*/
+    function num_string_range(start, end, step) {
+        let range = [];
+        if ((step === 0) || (typeof start == "undefined" || typeof end == "undefined") || (typeof start != typeof end))
+            return false;
+        if (end < start) {
+            step = -step;
+        }
+        if (typeof start == "number") {
+            while (step > 0 ? end >= start : end <= start) {
+                range.push(start);
+                start += step;
+            }
+        } else if (typeof start == "string") {
+            if (start.length !== 1 || end.length !== 1) {
+                throw TypeError("Strings with one character are supported.");
+            }
+            start = start.charCodeAt(0);
+            end = end.charCodeAt(0);
+            while (step > 0 ? end >= start : end <= start) {
+                range.push(String.fromCharCode(start));
+                start += step;
+            }
+        } else {
+            throw TypeError("Only string and number are supported");
+        }
+        return range;
+    }
+    console.log(num_string_range('a', "z", 2)); //=> ["a", "c", "e", "g", "i", "k", "m", "o", "q", "s", "u", "w", "y"]
+    console.log(num_string_range("Z", "A", 2)); //=> ["Z", "X", "V", "T", "R", "P", "N", "L", "J", "H", "F", "D", "B"]
+    console.log(num_string_range(0, -5, 1)); //=> [0, -1, -2, -3, -4, -5]
+    console.log(num_string_range(0, 25, 5)); //=> [0, 5, 10, 15, 20, 25]
+    console.log(num_string_range(20, 5, 5)); //=> [20, 15, 10, 5]
+</script>
+</body>
+</html>

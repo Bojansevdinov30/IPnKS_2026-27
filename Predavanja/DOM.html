@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DOM Sample 3</title>
+    <script type="text/javascript">
+        let switchCount = 0;
+        let adjectives = ["simple","complex","fascinating","unique"];
+        function switcher() {
+            if (switchCount === (adjectives.length - 1))
+                switchCount = 0;
+            else
+                switchCount++;
+            let italicNode = document.getElementById("adjPhrase");
+            italicNode.firstChild.nodeValue = adjectives[switchCount];
+        }
+    </script>
+</head>
+<body>
+<h1>An HTML Document</h1>
+<p>This is a <i id="adjPhrase">simple</i> document.
+<form>
+    <button type="button" onclick="switcher()">switch</button>
+</form>
+</body>
+</html>
