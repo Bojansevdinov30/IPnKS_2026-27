@@ -1,0 +1,148 @@
+<!--Задача 3.
+Во оваа задача треба да се направи игра слична на играта меморија (Слика 7). Екранот на играта
+е составен од табела, со 4х4 полиња. На почетокот на играта сите полиња се „затворени“
+(прикажана е слика која претставува позадина на полињата). При првиот потег играчот клика на
+едно од полињата и тоа се „отвара“ (се појавува сликата која ја крие полето) (Слика 8). При
+вториот потег се отвора ново поле (Слика 9).  При третиот потег се затвора полето што е прво
+отворено. Играта продолжува на ист начин, во секој момент има отворено точно две полиња и
+при секој нареден потег се затвора прво отвореното поле од тие две (Слика 10). Ако во ист
+момент има отворено полиња кој кријат иста слика тие остануваат отворени до крајот на играта.
+Играта завршува кога ќе бидат отворени сите полиња. Под играта се наоѓа копче „RESET“ која ја
+рестартира целата игра. -->
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        img {
+            width: 125px;
+            height: 125px;
+        }
+    </style>
+
+    <script>
+        let resetButton;
+        let tiles;
+        let permutation;
+        let first;
+        let second;
+
+        const ids = ['t11', 't12', 't13', 't14', 't21', 't22', 't23', 't24', 't31', 't32', 't33', 't34', 't41', 't42', 't43', 't44'];
+        const icons = [
+            'Cloth_icon.png',
+            'High_Quality_Metal_icon.png',
+            'Low_Grade_Fuel_icon.png',
+            'Metal_Fragments_icon.png',
+            'Scrap_icon.png',
+            'Stones_icon.png',
+            'Sulfur_icon.png',
+            'Wood_icon.png'
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            resetButton = document.querySelector('input[type="submit"]');
+            tiles = document.getElementsByTagName('td');
+
+            resetButton.addEventListener('click', () => initGame());
+
+            for (const tile of tiles) {
+                tile.addEventListener('click', click);
+            }
+
+            initGame();
+        });
+
+        function initGame() {
+            permutation = [...icons, ...icons];
+            shuffle();
+
+            for (let i = 0; i < 16; i++) {
+                document.querySelector(`td#${ids[i]} img`).src = 'default.png';
+            }
+        }
+
+        function shuffle() {
+            for (let i = permutation.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+
+                let temp = permutation[i];
+                permutation[i] = permutation[j];
+                permutation[j] = temp;
+            }
+        }
+
+        function click(event) {
+            let element;
+
+            if (event.target.nodeName === 'IMG') {
+                element = event.target.parentElement.id;
+            } else {
+                element = event.target.id;
+            }
+
+            if (!document.getElementById(element).children[0].src.match(/.*default\.png/g)) {
+                return;
+            }
+
+            document.getElementById(element).children[0].src = permutation[ids.indexOf(element)];
+
+            if (first !== undefined) {
+                document.getElementById(first).children[0].src = 'default.png';
+            }
+
+            first = second;
+            second = element;
+
+            if (first !== undefined && second !== undefined && document.getElementById(first).children[0].src === document.getElementById(second).children[0].src) {
+                first = undefined;
+                second = undefined;
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+
+<h1>Meморија</h1>
+
+<div style="text-align:left; float:left">
+
+    <table border="1">
+
+        <tr>
+            <td id="11"><img src=""/></td>
+            <td id="12"><img src=""/></td>
+            <td id="13"><img src=""/></td>
+            <td id="14"><img src=""/></td>
+        </tr>
+
+        <tr>
+            <td id="21"><img src=""/></td>
+            <td id="22"><img src=""/></td>
+            <td id="23"><img src=""/></td>
+            <td id="24"><img src=""/></td>
+        </tr>
+
+        <tr>
+            <td id="31"><img src=""/></td>
+            <td id="32"><img src=""/></td>
+            <td id="33"><img src=""/></td>
+            <td id="34"><img src=""/></td>
+        </tr>
+
+        <tr>
+            <td id="41"><img src=""/></td>
+            <td id="42"><img src=""/></td>
+            <td id="43"><img src=""/></td>
+            <td id="44"><img src=""/></td>
+        </tr>
+
+    </table>
+    <input type="submit" value="RESET"/>
+</div>
+<br/>
+</body>
