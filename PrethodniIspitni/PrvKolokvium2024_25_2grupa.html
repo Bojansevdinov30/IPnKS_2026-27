@@ -1,0 +1,370 @@
+<!--а се направи веб-страница за уплата на лото комбинации. Во горниот дел од
+веб-страницата се внесуваат податоци за корисникот кој уплаќа и тоа име и презиме,
+сума на уплата, шифра за уплатата, комбинација која се уплаќа (7 броеви, одделени со
+запирка помеѓу себе) и од паѓачка листа се избира дали се уплаќа и бонус или не (yes,
+no). Под формата се наоѓаат сите досега уплатени комбинации, прикажани во
+картички. При кликнување на копчето Add, ако сите полиња се пополнети, се додава
+картичка со ново уплатената комбинација, а полињата не се ресетираат (15 поени).
+Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред да се
+додаде нова комбинација, треба да се провери дали таа шифра е слободна (никој не ја
+искористил до сега) и не смее да содржи броеви и знаците ! и % (15 поени). Доколку
+наведените услови се исполнети, уплатата се регистрира и се додава.
+Откако ќе се уплатат 5 комбинации, се извлекуваат добитните лото комбинации. Со
+клик на копчето Get weekly combination, се генерираат и се прикажуваат на екран
+добитните 7 броеви за оваа недела (10 поени). Броевите се помеѓу 1 и 31 и се
+генерираат случајно. Откако ќе се генерираат броевите, се проверуваат уплатените
+лото комбинации. Соодветно, картичките на оние комбинации кои имаат погодено 3
+или помалку броеви се обојуваат во жолто, картичките со 4 и 5 погодени броеви се
+сини, а со 6 и 7 погодоци се зелени (10 поени). Сите картички во овој момент добиваат
+копче Get paid. Над картичките се наоѓа бројач, кој покажува која сума треба да се
+исплати на добитниците од сите картички заедно (5 поени). Добивката се пресметува
+како uplatena_suma + pogodeni_broevi*30, а ако е уплатен и бонус се додава уште 500.
+Доколку се притисне копчето Get paid на дадена картичка, картичката се брише од
+екранот, а уплатата се намалува за сумата која се исплатила на таа картичка (10
+поени).-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #ballsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            border: 1px solid black;
+            margin: 5px;
+            width: 400px;
+        }
+
+        .ball {
+            width: 30px;
+            border-radius: 100%;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 5px;
+        }
+
+        #topWrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 450px;
+            margin: 20px;
+        }
+
+        input {
+            margin: 10px;
+        }
+
+        #addBtn {
+            margin-left: 215px;
+        }
+
+        select {
+            margin: 10px;
+        }
+
+        #cardWrapper {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>National Lottery Game</h1>
+<div id="topWrapper">
+    <form id="form">
+        <h2>Assign Form</h2>
+        <div class="row">
+            <label for="name">Name and surname: </label>
+            <input type="text" id="name">
+        </div>
+        <div class="row">
+            <label for="amount">Ticket amount: </label>
+            <input type="text" id="amount">
+        </div>
+        <div class="row">
+            <label for="code">Code: </label>
+            <input type="text" id="code">
+        </div>
+        <div class="row">
+            <label for="combination">Combination: </label>
+            <input type="text" id="combination">
+        </div>
+        <div class="row">
+            <label for="bonus">Bonus: </label>
+            <select id="bonus">
+                <option id="yes">Yes</option>
+                <option id="no">No</option>
+            </select>
+        </div>
+        <input type="button" value="Add" id="addBtn" onclick="addCombination()">
+    </form>
+    <div id="lucky">
+        <h2>Lucky Numbers</h2>
+        <div id="ballsContainer">
+
+        </div>
+        <input type="button" value="Get weekly combination" id="combinationBtn" onclick="getWeeklyCombination()">
+        <p>Total win: </p>
+        <p id="total"></p>
+    </div>
+</div>
+<div id="cardWrapper">
+
+</div>
+
+<script>
+    let combinations = [];
+    let codes = new Set();
+    let winningCombination = [];
+    let registeredCount = 0;
+    let weeklyDrawn = false;
+
+    function addCombination() {
+        let cardWrapper = document.getElementById('cardWrapper');
+        let name = document.getElementById("name").value.trim();
+        let amount = document.getElementById("amount").value;
+        let code = document.getElementById("code").value.trim();
+        let combination = document.getElementById("combination").value;
+        let bonus = document.getElementById("bonus").value;
+
+        // Check that every field is filled
+        if (name === "" || amount === "" || code === "" ||
+            combination.trim() === "" || bonus === "") {
+            alert("Enter valid values");
+            return;
+        }
+
+        amount = Number(amount);
+
+        if (!Number.isFinite(amount) || amount < 0) {
+            alert("Enter a valid amount");
+            return;
+        }
+
+        // Convert the combination from strings to numbers
+        combination = combination.split(",").map(c => Number(c.trim()));
+
+        if (combination.length !== 7 ||
+            combination.some(c => !Number.isInteger(c) || c < 1 || c > 31) ||
+            new Set(combination).size !== 7) {
+            alert("Enter 7 different numbers between 1 and 31");
+            return;
+        }
+
+        // Code cannot contain numbers, ! or %
+        for (let i = 0; i < code.length; i++) {
+            if (!isNaN(code[i]) || code[i] === '!' || code[i] === '%') {
+                alert("Enter a valid code");
+                return;
+            }
+        }
+
+        // Check whether the code has already been used
+        if (codes.has(code)) {
+            alert("Card with that code already exists");
+            return;
+        }
+
+        codes.add(code);
+
+        // Save all the information for this ticket
+        let ticket = {
+            name: name,
+            amount: amount,
+            code: code,
+            numbers: combination,
+            bonus: bonus.toLowerCase() === "yes"
+        };
+
+        combinations.push(ticket);
+        registeredCount++;
+
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.code = code;
+
+        let cardCombination = document.createElement("div");
+        cardCombination.style.display = "flex";
+
+        for (let c of combination) {
+            let ball = document.createElement("div");
+            ball.classList.add("ball");
+            ball.innerHTML = `<p>${c}</p>`;
+            cardCombination.append(ball);
+        }
+
+        card.innerHTML = `
+            <p>Name: ${name}</p>
+            <p>Code: ${code}</p>
+            <p>Initial Amount: ${amount}</p>
+            <p class="cardCombination">Combination: </p>
+            <p class="cardWin">Total win: <span class="win"></span></p>
+        `;
+
+        card.querySelector(".cardCombination").appendChild(cardCombination);
+        cardWrapper.append(card);
+
+        // If the weekly numbers have already been drawn,
+        // calculate this new card's winnings immediately.
+        if (weeklyDrawn) {
+            updateWinnings();
+        }
+    }
+
+    function getWeeklyCombination() {
+        if (registeredCount < 5) {
+            alert("You need at least 5 registered combinations");
+            return;
+        }
+
+        let numbers = [];
+
+        for (let i = 0; i < 31; i++) {
+            numbers[i] = i + 1;
+        }
+
+        // Shuffle the numbers using Fisher-Yates
+        for (let i = numbers.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = numbers[i];
+            numbers[i] = numbers[j];
+            numbers[j] = temp;
+        }
+
+        winningCombination = numbers.slice(0, 7);
+        weeklyDrawn = true;
+
+        addWeeklyWinningCombination();
+    }
+
+    function addWeeklyWinningCombination() {
+        let container = document.getElementById("ballsContainer");
+        container.innerHTML = "";
+
+        for (let c of winningCombination) {
+            let ball = document.createElement("div");
+            ball.classList.add("ball");
+            ball.innerHTML = `<p>${c}</p>`;
+            container.append(ball);
+        }
+
+        updateWinnings();
+    }
+
+    function updateWinnings() {
+        let total = document.getElementById("total");
+        let cards = document.querySelectorAll(".card");
+        let totalMoney = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            let card = cards[i];
+            let code = card.dataset.code;
+
+            // Find the saved ticket belonging to this card
+            let ticket = combinations.find(c => c.code === code);
+
+            if (!ticket) {
+                continue;
+            }
+
+            let correct = numberOfCorrect(ticket.numbers);
+            let money = calculateWin(
+                ticket.numbers,
+                ticket.amount,
+                ticket.bonus
+            );
+
+            // Display the winnings on the card
+            card.querySelector(".win").textContent = money;
+            totalMoney += money;
+
+            // Color the card according to the number of matches
+            if (correct <= 3) {
+                card.style.backgroundColor = "yellow";
+            } else if (correct <= 5) {
+                card.style.backgroundColor = "blue";
+            } else {
+                card.style.backgroundColor = "green";
+            }
+
+            // Add Get paid button if it doesn't exist yet
+            if (!card.querySelector(".paidBtn")) {
+                let button = document.createElement("input");
+                button.type = "button";
+                button.value = "Get paid";
+                button.classList.add("paidBtn");
+                button.onclick = function () {
+                    getPaid(this);
+                };
+
+                card.append(button);
+            }
+        }
+
+        total.textContent = totalMoney;
+    }
+
+    function calculateWin(combination, amount, bonus) {
+        let correct = numberOfCorrect(combination);
+
+        let win = amount + correct * 30;
+
+        if (bonus) {
+            win += 500;
+        }
+
+        return win;
+    }
+
+    function numberOfCorrect(combination) {
+        let counter = 0;
+
+        for (let i = 0; i < combination.length; i++) {
+            for (let j = 0; j < winningCombination.length; j++) {
+                if (combination[i] === winningCombination[j]) {
+                    counter++;
+                }
+            }
+        }
+
+        return counter;
+    }
+
+    function getPaid(button) {
+        let card = button.parentElement;
+        let code = card.dataset.code;
+        let win = Number(card.querySelector(".win").textContent);
+
+        let total = document.getElementById("total");
+        total.textContent = Number(total.textContent) - win;
+
+        // Remove the card and its saved ticket
+        card.remove();
+
+        combinations = combinations.filter(c => c.code !== code);
+
+        // Do not remove the code from the Set:
+        // that code has already been used.
+    }
+</script>
+
+</body>
+</html>

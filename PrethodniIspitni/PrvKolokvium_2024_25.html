@@ -1,42 +1,32 @@
-<!--1. Да се направи веб-страница за огласување на предмети за продажба преку интернет. Во
-горниот дел од веб-страницата се внесуваат податоци за предметот и тоа име и презиме на
-огласувачот, име на предметот што се продава, код на предметот, опис на предметот, цена на
-чинење на произодот и од паѓачка листа се избира дали производот е употребуван или не
-(used, never-used). Под формата се наоѓаат две табели, една табела во која се додаваат
-огласите за користени предмети, а во другата табела се додаваат огласите за предмети кои
-не се користени. При кликнување на копчето Add, ако сите полиња се пополнети, се додава
-нов оглас во соодветната табела според тоа дали предметот е користен, а полињата не се
-ресетираат (15 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени).
-Пред да се додаде новиот оглас, потребно е да се провери дали веќе постои огласен предмет
-кој го има тој код. Доколку веќе има додадено предмет со тој код, потребно е да прикаже
-порака за грешка и предметот да не се додава (10 поени). Дополнително, треба да се провери
-дали податоците кои се внесени одговараат на потребните вредности, односно цената на
-производот треба да биде поголема од 0. При прикажување, цената на секој производ треба
-да се зголеми за 10% како вредност која останува за огласникот (5 поени). За секој оглас, се
-прикажува име и презиме на огласувачот, име на предметот, пресметана цена, кодот на
-предметот, каталошки број и копче Sold. Каталошки број на даден предмет се добива кога
-од кодот на бројот ќе се извадат сите броеви и знакот ! (15 поени). При клик на копчето Sold
-огласот се обојува во жолто и копчето се брише од редицата (10 поени). Во поле над табелите
-се наоѓа бројач кој прикажува број на активни огласи од двете табели (не продадени) (5
-поени). Во прилог е изгледот на страницата (15 поени).-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Advertise Item</title>
+    <title>Random Game</title>
     <style>
-        table{
-            border-collapse: collapse;
-            border-style: solid;
-            border-color: black;
-            border-width: 1px;
-        }
-        th, td {
-            border: 1px solid black;
+        .circle {
+            border-radius: 100%;
         }
 
-        body {
-            font-family: serif;
+        .square {
+            border-radius: 0%;
+        }
+
+        .card {
+            width: 250px;
+            height: 250px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        #gameContainer, #cardContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         form {
@@ -45,163 +35,311 @@
 
         .row {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin: 5px;
+        }
+
+        input[type=text] {
+            width: 200px;
+        }
+
+        select {
+            width: 200px;
         }
 
         label {
-            width: 160px;
-        }
-
-        input,
-        select {
-            width: 220px;
-        }
-
-        button {
-            margin-left: 5px;
+            width: 150px;
         }
     </style>
-
 </head>
 <body>
-<h1>Online Shop</h1>
-<form>
+
+<h1>Random Game</h1>
+
+<form id="form">
+    <h2>Register Card</h2>
+
     <div class="row">
-        <label for="name">Name and surname</label>
-        <input type="text" id="name">
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name">
     </div>
 
     <div class="row">
-        <label for="item">Item</label>
-        <input type="text" id="item">
+        <label for="code">Code:</label>
+        <input type="text" name="code" id="code">
     </div>
 
     <div class="row">
-        <label for="code">Item code</label>
-        <input type="text" id="code">
+        <label for="value">Value:</label>
+        <input type="text" name="value" id="value">
     </div>
 
     <div class="row">
-        <label for="description">Item description</label>
-        <input type="text" id="description">
-    </div>
-
-    <div class="row">
-        <label for="price">Price</label>
-        <input type="text" id="price">
-    </div>
-
-    <div class="row">
-        <label for="used">Used</label>
-        <select id="used">
-            <option>used</option>
-            <option>never-used</option>
+        <label for="shape">Shape:</label>
+        <select name="shape" id="shape">
+            <option value="circle">Circle</option>
+            <option value="square">Square</option>
         </select>
     </div>
 
-    <button type="button" onclick="addToTable()">Add</button>
+    <div class="row">
+        <label for="color">Color:</label>
+        <select name="color" id="color">
+            <option value="red">red</option>
+            <option value="green">green</option>
+            <option value="blue">blue</option>
+            <option value="yellow">yellow</option>
+            <option value="pink">pink</option>
+        </select>
+    </div>
+
+    <input type="button" value="Add Card" onclick="addCard()">
+
+    <h2>Game Cards</h2>
+    <input type="button" value="Start Game" onclick="startGame()">
+
+    <div id="cardContainer"></div>
 </form>
 
-<p>Active items: <strong id="activeItems">0</strong></p>
+<div id="randomGame" style="display: none">
+    <h2>Game Cards</h2>
+    <h3>Total cost: <strong id="cost"></strong></h3>
+    <div id="gameContainer"></div>
+</div>
 
-<h2>Unused Items</h2>
-
-<table id="unusedItems">
-    <tr><th>Name</th> <th>Item</th> <th>Price</th> <th>Code</th> <th>Number</th> <th>Actions</th></tr>
-
-</table>
-
-<h2>Used Items</h2>
-
-<table id="usedItems">
-    <tr><th>Name</th> <th>Item</th> <th>Price</th> <th>Code</th> <th>Number</th> <th>Actions</th></tr>
-
-</table>
 <script>
-    let unused = new Set();
-    let used = new Set();
-    let activeItems = document.getElementById('activeItems');
+    let collection = [];
+    let moves = 0;
+    let gameStarted = false;
 
+    function addCard() {
+        if (gameStarted) {
+            return;
+        }
 
-    function addToTable(){
-        let usedItems = document.getElementById("usedItems");
-        let unusedItems = document.getElementById("unusedItems");
         let name = document.getElementById("name").value;
-        let item = document.getElementById("item").value;
         let code = document.getElementById("code").value;
-        let description = document.getElementById("description").value;
-        let price = document.getElementById("price").value;
-        let isUsed = document.getElementById("used").selectedIndex; // 0 means used, 1 means never-used
-        if(name === "" || item === "" || code === "" || description === "" || price === ""){
-            alert("Please enter all values");
+        let value = document.getElementById("value").value;
+        let shape = document.getElementById("shape").value;
+        let color = document.getElementById("color").value;
+
+        let cardContainer = document.getElementById("cardContainer");
+
+        if (name == "" || code == "" || value == "" ||
+            shape == "" || color == "") {
+            alert("Please enter a valid value");
             return;
         }
-        if(used.has(code) || unused.has(code)){
-            alert("Item with code" + code + " already exists");
+
+        code = String(code);
+        value = Number(value);
+
+        if (!Number.isFinite(value) || value < 0) {
+            alert("Please enter a valid value");
             return;
         }
-        let row = document.createElement("tr");
-        let nameCell = document.createElement("td");
-        let itemCell = document.createElement("td");
-        let priceCell = document.createElement("td");
-        let codeCell = document.createElement("td");
-        let numberCell = document.createElement("td");
-        let actionCell = document.createElement("td");
-        let actionBtn = document.createElement("button");
-        actionBtn.innerText = "Sold";
-        actionBtn.setAttribute("type", "button");
-        actionBtn.setAttribute("id", "actionBtn");
-        actionBtn.setAttribute("onclick", "sell(this)");
-        actionCell.appendChild(actionBtn);
-        nameCell.innerText = name;
-        itemCell.innerText = item;
-        price = parseInt(price);
-        if(price <=0 || isNaN(price)){
-            alert("Please enter a valid price");
-            return;
-        }
-        price = 1.1 * price;
-        price = parseInt(price);
-        priceCell.innerText = price;
-        codeCell.innerText = code;
-        let number = "";
-        for (let i =0; i< code.length; i++){
-            if(code[i] !== '!' && isNaN(parseInt(code[i]))){
-                number += code[i];
+
+        for (let i = 0; i < code.length; i++) {
+            if (!(code[i] >= 'A' && code[i] <= 'Z')) {
+                alert("Please enter a valid code");
+                return;
             }
         }
-        numberCell.innerText = number;
-        row.appendChild(nameCell);
-        row.appendChild(itemCell);
-        row.appendChild(priceCell);
-        row.appendChild(codeCell);
-        row.appendChild(numberCell);
-        row.appendChild(actionCell);
-        if (isUsed == 0) {
-            usedItems.appendChild(row);
-            used.add(code);
-        } else {
-            unusedItems.appendChild(row);
-            unused.add(code);
-        }
-        let active = activeItems.innerText;
-        active = parseInt(active);
-        active = ++active;
-        activeItems.innerText = active;
 
+        let card = document.createElement("div");
+
+        card.classList.add("card");
+        card.style.backgroundColor = color;
+        card.classList.add(shape);
+
+        card.dataset.value = value;
+
+        card.innerHTML = `
+            <div class="text">
+                <p>Name: ${name}</p>
+                <p>Code: ${code}</p>
+                <p>Value: ${value}</p>
+            </div>
+        `;
+
+        cardContainer.appendChild(card);
+        collection.push(card);
     }
-    function sell(button){
-        let cell = button.parentElement;
-        let row = cell.parentElement;
-        row.style.backgroundColor = "yellow";
-        cell.removeChild(button);
-        let active = activeItems.innerText;
-        active = parseInt(active);
-        active = --active;
-        activeItems.innerText = active;
 
+    function startGame() {
+        if (gameStarted || collection.length === 0) {
+            return;
+        }
+
+        gameStarted = true;
+
+        let gameContainer = document.getElementById("gameContainer");
+        let randomGame = document.getElementById("randomGame");
+        let form = document.getElementById("form");
+
+        form.style.display = "none";
+        randomGame.style.display = "";
+
+        // Shuffle the cards' initial order.
+        for (let i = collection.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = collection[i];
+            collection[i] = collection[j];
+            collection[j] = temp;
+        }
+
+        // Generate unique desired positions.
+        let positions = [];
+
+        for (let i = 1; i <= collection.length; i++) {
+            positions.push(i);
+        }
+
+        for (let i = positions.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = positions[i];
+            positions[i] = positions[j];
+            positions[j] = temp;
+        }
+
+        // Assign desired position and shape to every card.
+        for (let i = 0; i < collection.length; i++) {
+            let card = collection[i];
+
+            card.dataset.desiredPosition = positions[i];
+
+            card.dataset.desiredShape =
+                Math.random() < 0.5 ? "circle" : "square";
+
+            let text = card.querySelector(".text");
+
+            text.innerHTML += `
+                <p>Position: ${card.dataset.desiredPosition}</p>
+                <p>Shape: ${card.dataset.desiredShape}</p>
+
+                <div>
+                    <input type="button" value="<"
+                        onclick="moveLeft(this)">
+                    <input type="button" value=">"
+                        onclick="moveRight(this)">
+                </div>
+
+                <input type="button" value="Change Shape"
+                    onclick="changeShape(this)">
+            `;
+
+            gameContainer.appendChild(card);
+        }
+
+        updateCost();
+    }
+
+    function moveLeft(button) {
+        let card = button.closest(".card");
+        let i = collection.indexOf(card);
+
+        if (i === 0) {
+            return;
+        }
+
+        [collection[i - 1], collection[i]] =
+            [collection[i], collection[i - 1]];
+
+        moves++;
+
+        let gameContainer = document.getElementById("gameContainer");
+
+        gameContainer.innerHTML = "";
+
+        for (let card of collection) {
+            gameContainer.appendChild(card);
+        }
+
+        updateCost();
+    }
+
+    function moveRight(button) {
+        let card = button.closest(".card");
+        let i = collection.indexOf(card);
+
+        if (i === collection.length - 1) {
+            return;
+        }
+
+        [collection[i], collection[i + 1]] =
+            [collection[i + 1], collection[i]];
+
+        moves++;
+
+        let gameContainer = document.getElementById("gameContainer");
+
+        gameContainer.innerHTML = "";
+
+        for (let card of collection) {
+            gameContainer.appendChild(card);
+        }
+
+        updateCost();
+    }
+
+    function changeShape(button) {
+        let card = button.closest(".card");
+
+        if (card.classList.contains("circle")) {
+            card.classList.remove("circle");
+            card.classList.add("square");
+        } else {
+            card.classList.remove("square");
+            card.classList.add("circle");
+        }
+
+        moves++;
+
+        updateCost();
+    }
+
+    function updateCost() {
+        let totalErrors = 0;
+        let totalValue = 0;
+        let allCorrect = true;
+
+        for (let i = 0; i < collection.length; i++) {
+            let card = collection[i];
+
+            let currentPosition = i + 1;
+            let desiredPosition =
+                Number(card.dataset.desiredPosition);
+
+            let positionError =
+                Math.abs(desiredPosition - currentPosition) * 50;
+
+            let wrongShape =
+                card.classList.contains(card.dataset.desiredShape)
+                    ? 0
+                    : 1;
+
+            let shapeError = wrongShape * 30;
+
+            totalErrors += positionError + shapeError;
+            totalValue += Number(card.dataset.value);
+
+            if (positionError !== 0 || wrongShape !== 0) {
+                allCorrect = false;
+            }
+        }
+
+        let costElement = document.getElementById("cost");
+
+        if (allCorrect) {
+            costElement.textContent = totalValue - moves * 10;
+        } else {
+            costElement.textContent = totalErrors;
+        }
     }
 </script>
+
 </body>
 </html>

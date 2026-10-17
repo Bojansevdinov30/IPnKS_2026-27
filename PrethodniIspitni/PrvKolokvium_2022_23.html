@@ -1,0 +1,207 @@
+<!--1. Да се направи веб-страница за огласување на предмети за продажба преку интернет. Во
+горниот дел од веб-страницата се внесуваат податоци за предметот и тоа име и презиме на
+огласувачот, име на предметот што се продава, код на предметот, опис на предметот, цена на
+чинење на произодот и од паѓачка листа се избира дали производот е употребуван или не
+(used, never-used). Под формата се наоѓаат две табели, една табела во која се додаваат
+огласите за користени предмети, а во другата табела се додаваат огласите за предмети кои
+не се користени. При кликнување на копчето Add, ако сите полиња се пополнети, се додава
+нов оглас во соодветната табела според тоа дали предметот е користен, а полињата не се
+ресетираат (15 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени).
+Пред да се додаде новиот оглас, потребно е да се провери дали веќе постои огласен предмет
+кој го има тој код. Доколку веќе има додадено предмет со тој код, потребно е да прикаже
+порака за грешка и предметот да не се додава (10 поени). Дополнително, треба да се провери
+дали податоците кои се внесени одговараат на потребните вредности, односно цената на
+производот треба да биде поголема од 0. При прикажување, цената на секој производ треба
+да се зголеми за 10% како вредност која останува за огласникот (5 поени). За секој оглас, се
+прикажува име и презиме на огласувачот, име на предметот, пресметана цена, кодот на
+предметот, каталошки број и копче Sold. Каталошки број на даден предмет се добива кога
+од кодот на бројот ќе се извадат сите броеви и знакот ! (15 поени). При клик на копчето Sold
+огласот се обојува во жолто и копчето се брише од редицата (10 поени). Во поле над табелите
+се наоѓа бројач кој прикажува број на активни огласи од двете табели (не продадени) (5
+поени). Во прилог е изгледот на страницата (15 поени).-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advertise Item</title>
+    <style>
+        table{
+            border-collapse: collapse;
+            border-style: solid;
+            border-color: black;
+            border-width: 1px;
+        }
+        th, td {
+            border: 1px solid black;
+        }
+
+        body {
+            font-family: serif;
+        }
+
+        form {
+            width: 450px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label {
+            width: 160px;
+        }
+
+        input,
+        select {
+            width: 220px;
+        }
+
+        button {
+            margin-left: 5px;
+        }
+    </style>
+
+</head>
+<body>
+<h1>Online Shop</h1>
+<form>
+    <div class="row">
+        <label for="name">Name and surname</label>
+        <input type="text" id="name">
+    </div>
+
+    <div class="row">
+        <label for="item">Item</label>
+        <input type="text" id="item">
+    </div>
+
+    <div class="row">
+        <label for="code">Item code</label>
+        <input type="text" id="code">
+    </div>
+
+    <div class="row">
+        <label for="description">Item description</label>
+        <input type="text" id="description">
+    </div>
+
+    <div class="row">
+        <label for="price">Price</label>
+        <input type="text" id="price">
+    </div>
+
+    <div class="row">
+        <label for="used">Used</label>
+        <select id="used">
+            <option>used</option>
+            <option>never-used</option>
+        </select>
+    </div>
+
+    <button type="button" onclick="addToTable()">Add</button>
+</form>
+
+<p>Active items: <strong id="activeItems">0</strong></p>
+
+<h2>Unused Items</h2>
+
+<table id="unusedItems">
+    <tr><th>Name</th> <th>Item</th> <th>Price</th> <th>Code</th> <th>Number</th> <th>Actions</th></tr>
+
+</table>
+
+<h2>Used Items</h2>
+
+<table id="usedItems">
+    <tr><th>Name</th> <th>Item</th> <th>Price</th> <th>Code</th> <th>Number</th> <th>Actions</th></tr>
+
+</table>
+<script>
+    let unused = new Set();
+    let used = new Set();
+    let activeItems = document.getElementById('activeItems');
+
+
+    function addToTable(){
+        let usedItems = document.getElementById("usedItems");
+        let unusedItems = document.getElementById("unusedItems");
+        let name = document.getElementById("name").value;
+        let item = document.getElementById("item").value;
+        let code = document.getElementById("code").value;
+        let description = document.getElementById("description").value;
+        let price = document.getElementById("price").value;
+        let isUsed = document.getElementById("used").selectedIndex; // 0 means used, 1 means never-used
+        if(name === "" || item === "" || code === "" || description === "" || price === ""){
+            alert("Please enter all values");
+            return;
+        }
+        if(used.has(code) || unused.has(code)){
+            alert("Item with code" + code + " already exists");
+            return;
+        }
+        let row = document.createElement("tr");
+        let nameCell = document.createElement("td");
+        let itemCell = document.createElement("td");
+        let priceCell = document.createElement("td");
+        let codeCell = document.createElement("td");
+        let numberCell = document.createElement("td");
+        let actionCell = document.createElement("td");
+        let actionBtn = document.createElement("button");
+        actionBtn.innerText = "Sold";
+        actionBtn.setAttribute("type", "button");
+        actionBtn.setAttribute("id", "actionBtn");
+        actionBtn.setAttribute("onclick", "sell(this)");
+        actionCell.appendChild(actionBtn);
+        nameCell.innerText = name;
+        itemCell.innerText = item;
+        price = parseInt(price);
+        if(price <=0 || isNaN(price)){
+            alert("Please enter a valid price");
+            return;
+        }
+        price = 1.1 * price;
+        price = parseInt(price);
+        priceCell.innerText = price;
+        codeCell.innerText = code;
+        let number = "";
+        for (let i =0; i< code.length; i++){
+            if(code[i] !== '!' && isNaN(parseInt(code[i]))){
+                number += code[i];
+            }
+        }
+        numberCell.innerText = number;
+        row.appendChild(nameCell);
+        row.appendChild(itemCell);
+        row.appendChild(priceCell);
+        row.appendChild(codeCell);
+        row.appendChild(numberCell);
+        row.appendChild(actionCell);
+        if (isUsed == 0) {
+            usedItems.appendChild(row);
+            used.add(code);
+        } else {
+            unusedItems.appendChild(row);
+            unused.add(code);
+        }
+        let active = activeItems.innerText;
+        active = parseInt(active);
+        active = ++active;
+        activeItems.innerText = active;
+
+    }
+    function sell(button){
+        let cell = button.parentElement;
+        let row = cell.parentElement;
+        row.style.backgroundColor = "yellow";
+        cell.removeChild(button);
+        let active = activeItems.innerText;
+        active = parseInt(active);
+        active = --active;
+        activeItems.innerText = active;
+
+    }
+</script>
+</body>
+</html>
