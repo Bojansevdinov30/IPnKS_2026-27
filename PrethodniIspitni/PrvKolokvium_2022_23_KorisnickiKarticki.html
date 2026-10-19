@@ -1,0 +1,207 @@
+<!--Да се направи веб страна каде што се внесува username,id,width,height,color(red,yellow,green,blue) и копче Add.
+Доколку не се пополнети сите полиња треба да не се дозволи внесување на податоците и се фрла грешка а полињата не се ресетираат.
+Треба да се провери дали id се состои од мали букви само(не смее бројки, а специјални знаци смее).
+При внесување нов корисник треба да се провери дали id-to е исто, доколку е исто само треба да се апдејтираат другите податоци во
+веќе постоечкиот корисник.Вкупната цена се пресметува како pixel * 0.5. Вкупниот број на пиксели се добива како width*height. Ако бојата
+е црвена треба да се додаде 1000 на постоечката цена, во спротивно не се додава ништо.
+Должината и висината мора да се ненулти вредности и не смеат да бидат повеќе од 500.
+При додавање се додава и копче Sell, кое што при кликнување на него се брише елементот и при тоа се ажурира вкупната сума на продадени
+картички.-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #cardContainer{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .card{
+            margin: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        form{
+            width: 400px;
+        }
+        #total{
+            font-weight: bold;
+        }
+        .row{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input:not(#createBtn, .sell), select {
+            width: 200px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>User Cards</h1>
+<form id="form">
+    <div class="row">
+        <label for="username">Username</label>
+        <input type="text" id="username">
+    </div>
+    <div class="row">
+        <label for="width">Width</label>
+        <div><input type="text" id="width" style="position: relative; left: 16px"><span style="position: relative; left: 16px">px</span></div>
+    </div>
+    <div class="row">
+        <label for="height">Height</label>
+        <div><input type="text" id="height" style="position: relative; left: 16px"><span style="position: relative; left: 16px">px</span></div>
+    </div>
+    <div class="row">
+        <label for="cardID">Card ID</label>
+        <input type="text" id="cardID">
+    </div>
+    <div class="row">
+        <label for="color">Color</label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+        </select>
+    </div>
+    <input type="button" value="Create" id="createBtn" onclick="createCard()">
+</form>
+<p>Total value of sold cards: <span id="total">0</span></p>
+
+<div id="cardContainer">
+
+</div>
+<script>
+    let cardContainer = document.getElementById('cardContainer');
+    let total = 0;
+    let users = [];
+    let cardIds = new Set();
+
+    class User{
+        constructor(cardID, username, width, height, color) {
+            this.cardID = cardID;
+            this.username = username;
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.value = 0;
+        }
+    }
+
+    function createCard() {
+        let username = document.getElementById("username").value;
+        let width = document.getElementById("width").value;
+        let height = document.getElementById("height").value;
+        let cardID = document.getElementById("cardID").value;
+        let color = document.getElementById("color").value;
+        if(username == "" || width == "" || height == "" || color == "" || cardID == ""){
+            alert("Please enter a valid input!");
+            return;
+        }
+        width = parseInt(width);
+        height = parseInt(height);
+        if(width <=0 || width > 500){
+            alert("Please enter a valid width!");
+            return;
+        }
+        if(height <= 0 || height > 500){
+            alert("Please enter a valid height!");
+            return;
+        }
+        for(let i = 0; i < cardID.length; i++) {
+            if(cardID[i] >= "A" && cardID[i] <= "Z" || !isNaN(cardID[i])){
+                alert("Please enter a valid cardID!");
+                return;
+            }
+        }
+
+        if(cardIds.has(cardID)){
+            for(let i = 0; i < users.length; i++){
+                if(users[i].cardID === cardID){
+                    users[i].username = username;
+                    users[i].width = width;
+                    users[i].height = height;
+                    users[i].color = color;
+                    users[i].value = calculateValue(users[i], width, height, color);
+                    refreshCards();
+                    return;
+                }
+            }
+        }
+        cardIds.add(cardID);
+        let user = new User(cardID, username, width, height, color);
+        users.push(user);
+
+        cardContainer.appendChild(card(user));
+
+    }
+
+    function card(user){
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.style.width = user.width+"px";
+        card.style.height = user.height+"px";
+        card.style.backgroundColor = user.color;
+        card.dataset.cardID = user.cardID;
+        card.innerHTML += `<p>ID: ${user.cardID}</p>
+                           <p>Width: ${user.width}</p>
+                           <p>Height: ${user.height}</p>
+                           <p>Value: ${calculateValue(user, user.width, user.height, user.color)}</p>
+                           <input type="button" class="sell" value="Sell" onclick="sellCard(this)">`;
+        return card;
+    }
+
+    function calculateValue(user, width, height, color) {
+        let value = 0;
+        value += width*height*0.5;
+        if(color === "red"){
+            value += 1000;
+        }
+        user.value = value;
+        return String(value)
+    }
+
+    function sellCard(button) {
+        let card = button.parentElement;
+        let id = card.dataset.cardID;
+        let value;
+        for(let i = 0; i < users.length; i++) {
+            if(users[i].cardID == id){
+                value = users[i].value;
+            }
+        }
+        total += value;
+        let totalContainer = document.getElementById("total");
+        totalContainer.innerText = total;
+        cardContainer.removeChild(card);
+        users = users.filter(user => user.cardID !== id);
+        let IdsArray = [...cardIds];
+        IdsArray = IdsArray.filter(cardId => cardId !== id);
+        cardIds = new Set(IdsArray);
+    }
+
+    function refreshCards(){
+        cardContainer.innerHTML = "";
+        for(let i = 0; i < users.length; i++) {
+            cardContainer.appendChild(card(users[i]));
+        }
+    }
+
+
+
+</script>
+</body>
+</html>

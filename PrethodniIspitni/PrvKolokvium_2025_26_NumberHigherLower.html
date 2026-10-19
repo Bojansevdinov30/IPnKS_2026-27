@@ -1,0 +1,357 @@
+<!--delot so timer go nemalo, jas si go dodadov za vezba-->
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Kolokviumska Grupa 2</title>
+
+    <style>
+        #full {
+            display: flex;
+            justify-content: left;
+        }
+
+        #lucky_del {
+            margin-left: 30px;
+        }
+
+        label {
+            display: inline-block;
+            width: 150px;
+            margin-bottom: 10px;
+        }
+
+        #add {
+            margin-top: 10px;
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        #vnesuvanje > div {
+            padding: 10px;
+            border: 1px solid black;
+            width: 250px;
+            height: 250px;
+            display: inline-block;
+            margin: 15px;
+        }
+
+        #lucky_number {
+            border: 1px solid black;
+            width: 80px;
+            height: 60px;
+            padding-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 32px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1 id="naslov">Lottery Game</h1>
+
+<div id="full">
+
+    <div id="forma_del">
+
+        <h2>Lottery Form</h2>
+
+        <div>
+            <label>Username:</label>
+            <input type="text" id="name">
+        </div>
+
+        <div>
+            <label>Ticket amount:</label>
+            <input type="text" id="amount">
+        </div>
+
+        <div>
+            <label>Number:</label>
+            <input type="text" id="number">
+        </div>
+
+        <div>
+            <label>Rank:</label>
+            <select id="rank">
+                <option value="above">above</option>
+                <option value="below">below</option>
+            </select>
+        </div>
+
+        <button id="add" onclick="add()">Add</button>
+
+    </div>
+
+    <div id="lucky_del">
+
+        <button id="new_round" onclick="new_round()">New round</button>
+
+        <!-- Timer appears here -->
+        <p id="timer"></p>
+
+        <p>Lucky Number:</p>
+
+        <div id="lucky_number"></div>
+
+    </div>
+
+</div>
+
+<div id="vnesuvanje"></div>
+
+
+<script>
+
+    var users = [];
+    var ucesnici = 0;
+    var lucky_number;
+    var round_counter = 0;
+
+    // Variable that stores the interval
+    var timer;
+
+
+    function add() {
+
+        var name = document.getElementById("name").value;
+        var amount = document.getElementById("amount").value;
+        var number = document.getElementById("number").value;
+        var rank = document.getElementById("rank").value;
+
+        if (name === "" || amount === "" || number === "") {
+            alert("Please enter all fields");
+            return;
+        }
+
+        if (!/^[A-Z]+$/.test(name) || name.length % 2 === 0) {
+            alert("Invalid name");
+            return;
+        }
+
+        number = parseInt(number);
+        amount = parseInt(amount);
+
+        ucesnici++;
+
+        var user = {
+            name: name,
+            amount: amount,
+            number: number,
+            rank: rank,
+            id: "kartica" + ucesnici
+        };
+
+        users.push(user);
+
+        var vnes = document.getElementById("vnesuvanje");
+
+        print(vnes);
+    }
+
+
+    function print(vnes) {
+
+        vnes.innerHTML = "";
+
+        for (var i = 0; i < users.length; i++) {
+
+            vnes.innerHTML +=
+                "<div id=" + users[i].id + ">" +
+                "<p>Name: " + users[i].name + "</p>" +
+                "<p>Amount: " + users[i].amount + "</p>" +
+                "<p>Number: " + users[i].number + "</p>" +
+                "<p>Rank: " + users[i].rank + "</p>" +
+                "</div>";
+
+            switch (users[i].rank) {
+
+                case "above": {
+                    document.getElementById(users[i].id).style.backgroundColor = "yellow";
+                    break;
+                }
+
+                case "below": {
+                    document.getElementById(users[i].id).style.backgroundColor = "red";
+                    break;
+                }
+            }
+        }
+    }
+
+
+    function printwinner(indeks) {
+
+        var vnes = document.getElementById("vnesuvanje");
+
+        vnes.innerHTML = "";
+
+        vnes.innerHTML +=
+            "<div id=" + users[indeks].id + ">" +
+            "<p>Name: " + users[indeks].name + "</p>" +
+            "<p>Amount: " + users[indeks].amount + "</p>" +
+            "<p>Number: " + users[indeks].number + "</p>" +
+            "<p>Rank: " + users[indeks].rank + "</p>" +
+            "</div>";
+
+        switch (users[indeks].rank) {
+
+            case "above": {
+                document.getElementById(users[indeks].id).style.backgroundColor = "yellow";
+                break;
+            }
+
+            case "below": {
+                document.getElementById(users[indeks].id).style.backgroundColor = "red";
+                break;
+            }
+        }
+    }
+
+
+    function new_round() {
+
+        /*
+            If two rounds have already happened,
+            find the user with the smallest amount.
+        */
+        if (round_counter === 2) {
+
+            document.getElementById("new_round").remove();
+
+            var min = 10000;
+            var indeks = -1;
+
+            for (var i = 0; i < users.length; i++) {
+
+                if (users[i].amount < min) {
+
+                    min = users[i].amount;
+                    indeks = i;
+                }
+            }
+
+            printwinner(indeks);
+
+            return;
+        }
+
+
+        /*
+            START TIMER
+        */
+
+        var time = 10;
+
+        var timerElement = document.getElementById("timer");
+
+        timerElement.innerText = time;
+
+        // Prevent clicking the button multiple times
+        document.getElementById("new_round").disabled = true;
+
+
+        timer = setInterval(function () {
+
+            time--;
+
+            timerElement.innerText = time;
+
+
+            /*
+                When timer reaches 0,
+                stop the timer and start the round.
+            */
+            if (time === 0) {
+
+                clearInterval(timer);
+
+                // Make the timer disappear
+                timerElement.innerText = "";
+
+                // Allow the button to be clicked again
+                document.getElementById("new_round").disabled = false;
+
+
+                /*
+                    YOUR ORIGINAL ROUND LOGIC
+                */
+
+                round_counter++;
+
+                var vnesibroj =
+                    document.getElementById("lucky_number");
+
+                lucky_number =
+                    Math.floor(Math.random() * 100 + 1);
+
+                vnesibroj.innerText = lucky_number;
+
+
+                /*
+                    Check every user
+                */
+
+                for (var i = 0; i < users.length; i++) {
+
+                    if (users[i].rank === 'above') {
+
+                        if (users[i].number < lucky_number) {
+
+                            users[i].amount += 20;
+
+                        } else {
+
+                            users[i].amount -= 20;
+
+                        }
+                    } else if (users[i].rank === 'below') {
+
+                        if (users[i].number > lucky_number) {
+
+                            users[i].amount += 20;
+
+                        } else {
+
+                            users[i].amount -= 20;
+
+                        }
+                    }
+
+
+                    /*
+                        If user's number is exactly
+                        the lucky number, remove them.
+                    */
+
+                    if (users[i].number === lucky_number) {
+
+                        document
+                            .getElementById(users[i].id)
+                            .remove();
+
+                        users.splice(i, 1);
+
+                        i--;
+                    }
+                }
+
+
+                /*
+                    Print the updated users
+                */
+
+                var vnes =
+                    document.getElementById("vnesuvanje");
+
+                print(vnes);
+            }
+
+        }, 1000);
+    }
+
+</script>
+
+</body>
+</html>

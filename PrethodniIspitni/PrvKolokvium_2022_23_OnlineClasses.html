@@ -1,0 +1,223 @@
+<!--Да се направи веб-страница за регистрирање на корисници во систем за online часови. Во
+горниот дел од веб-страницата се внесуваат податоци за корисникот и тоа име и презиме,
+емаил адреса, години на старост, корисничко име, лозинка и од паѓачка листа се избира дали
+корисникот е наставник или ученик (teacher, student). Под формата се наоѓа табела во која се
+сместуваат корисниците. При кликнување на копчето Add, ако сите полиња се пополнети, се
+додава нов корисник во табелата, а полињата не се ресетираат (15 поени). Ако не се внесени
+сите полиња се печати порака за грешка (5 поени). Пред да се додаде нов корисник во
+табелата, треба да се провери дали корисничкото име е веќе искористено. Доколку некој
+корисник го искористил тоа корисничко име, не треба да се додаде новиот корисник и треба
+да се прикаже порака за грешка (10 поени). Исто така, треба да се направи проверка на
+лозинката на корисникот да биде долга барем 10 знаци, да содржи барем една голема буква и
+една бројка (15 поени). Дополнително, корисник помлад од 18 години не може да биде
+наставник на платформата, па не треба да се овозможи вакво додавање (5 поени). При
+прикажувањето на секој корисник, се прикажува името и презимето на корисникот, неговото
+корисничко име, емаил адреса, години на старост и улога. Сите студенти се обоени со сина
+боја, а наставниците со зелена (5 поени). За секој наставник, дополнително во секоја редица
+се наоѓа и копче Hire. При клик на копчето Hire, копчето се брише од редицата, а редицата се
+обојува во сиво (5 поени). Над табелата, стои поле во кое е прикажан бројот на слободни
+наставници кои може да се ангажираат за часови (5 поени). Во прилог е изгледот на
+страницата (15 поени).-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #table{
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        #numberOfTeachers {
+            font-weight: bold;
+        }
+
+        h1 {
+            display: flex;
+            justify-content: center;
+        }
+
+        form{
+            width: 400px;
+            height: 200px;
+        }
+        .row{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input{
+            margin: 5px;
+        }
+        #role{
+            padding:0 54px;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Online Classes</h1>
+<div id="formContainer">
+    <form id="form">
+        <div class="row">
+            <label for="name">Name and surname</label>
+            <input type="text" id="name">
+        </div>
+        <div class="row">
+            <label for="email">Email</label>
+            <input type="text" id="email">
+        </div>
+        <div class="row">
+            <label for="age">Age</label>
+            <input type="text" id="age">
+        </div>
+        <div class="row">
+            <label for="username">Username</label>
+            <input type="text" id="username">
+        </div>
+        <div class="row">
+            <label for="password">Password</label>
+            <input type="text" id="password">
+        </div>
+        <div class="row">
+            <label for="role">Role</label>
+            <select id="role">
+                <option id="student">student</option>
+                <option id="teacher">teacher</option>
+            </select>
+        </div>
+        <input type="button" id="addBtn" value="Add" onclick="addUser()">
+    </form>
+    <p>Available teachers: <span id="numberOfTeachers"></span></p>
+</div>
+<div id="userContainer">
+    <h2>Users</h2>
+    <table id="table">
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Age</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </table>
+</div>
+<script>
+    let usernames = new Set();
+    let table = document.getElementById("table");
+    function addUser() {
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
+        let age = document.getElementById("age").value;
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let role = document.getElementById("role").value;
+
+        if(name =="" || email == "" || age =="" || username =="" || password =="" || role ==""){
+            alert("Please fill out all fields");
+            return;
+        }
+        if(usernames.has(username)) {
+            alert("Username already taken");
+            return;
+        }
+
+        if(!passwordCheck(password)){
+            alert("Password not strong enough");
+            return;
+        }
+
+        age = parseInt(age);
+        if(age <=18 && role == "teacher"){
+            alert("You cannot be a teacher if you are younger than 18");
+            return;
+        }
+        let row = document.createElement("tr");
+        let nameCell = document.createElement("td");
+        let usernameCell = document.createElement("td");
+        let emailCell = document.createElement("td");
+        let ageCell = document.createElement("td");
+        let roleCell = document.createElement("td");
+        let actionCell = document.createElement("td");
+        nameCell.innerText = name;
+        usernameCell.innerText = username;
+        emailCell.innerText = email;
+        ageCell.innerText = age;
+        roleCell.innerText = role;
+
+        let actionBtn;
+        if(role == "teacher"){
+            row.style.backgroundColor = "green";
+            increaseActiveTeachers();
+            actionBtn = document.createElement("input");
+            actionBtn.setAttribute("type", "button");
+            actionBtn.setAttribute("class", "actionBtn");
+            actionBtn.setAttribute("onclick", "decreaseActiveTeachers(this)");
+            actionBtn.setAttribute("value", "Hire");
+            actionCell.appendChild(actionBtn);
+        }else{
+            row.style.backgroundColor = "blue";
+            actionCell.style.backgroundColor = "white";
+        }
+        row.appendChild(nameCell);
+        row.appendChild(usernameCell);
+        row.appendChild(emailCell);
+        row.appendChild(ageCell);
+        row.appendChild(roleCell);
+        row.appendChild(actionCell);
+        table.appendChild(row);
+        usernames.add(username);
+
+    }
+
+    function increaseActiveTeachers(){
+        let activeTeachers = document.getElementById("numberOfTeachers");
+        let number = Number(activeTeachers.innerText);
+        if(isNaN(number) || number <= 0){
+            number = 0;
+        }
+        number++;
+        activeTeachers.innerText = String(number);
+    }
+    function decreaseActiveTeachers(button){
+        let cell = button.parentElement;
+        let row = cell.parentElement;
+        let activeTeachers = document.getElementById("numberOfTeachers");
+        let number = Number(activeTeachers.innerText);
+        number--;
+        activeTeachers.innerText = String(number);
+        row.style.backgroundColor = "grey";
+        cell.style.backgroundColor = "white";
+        cell.removeChild(button);
+        if(isNaN(number) || number <= 0){
+            number = 0;
+            return;
+        }
+    }
+
+    function passwordCheck(password) {
+        if(password.length < 10) {
+            return false;
+        }
+        let hasUpper = false;
+        let hasNumber = false;
+        for (let i = 0; i < password.length; i++) {
+            if(!isNaN(password.charAt(i))){
+                hasNumber = true;
+            }
+            if(password.charAt(i) >= "A" && password.charAt(i) <= "Z"){
+                hasUpper = true;
+            }
+        }
+        return hasUpper && hasNumber;
+    }
+
+</script>
+</body>
+</html>
