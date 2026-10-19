@@ -1,0 +1,161 @@
+<!--На една веб страна поставени се една text area, едно input поле и едно копче.
+Во text area се внесува текст во формат како на сликата, а во input полето се внесува
+карактер според кој сакаме да го поделиме текстот (слика 1). Со притискање на копчето
+Create се креира табела, каде првата редица е заглавие на табелата и е составена од
+податоците во првиот ред (слика 2). Во наредните редици од табелата следуваат останатите
+редици од текстот. Со притискање на редицата, редицата се брише и се брише соодветната
+линија од текстот (слика 3).
+
+The example text inside the textarea is:
+
+Plain Text
+Name,Surname,Index
+Jon,Doe,100001
+Melody,Fernandez,100002
+Olivia,Lee,100003
+James,Fitzpatrick,100004
+Danielle,Mathis,100005
+Eddie,Johnson,100006
+
+Delimiter input:
+
+Plain Text
+,
+
+Expected functionality:
+
+User enters multiline text in a <textarea>.
+User enters a delimiter character (e.g. ,).
+Clicking Create:
+Creates a table.
+First line becomes the table header.
+Remaining lines become table rows.
+Clicking any row in the table:
+Removes that row from the table.
+Removes the corresponding line from the textarea as well.
+
+This is a classic JavaScript DOM manipulation exam problem involving:
+
+textarea
+split('\n')
+split(delimiter)
+dynamic table creation (createElement)
+row click events (addEventListener('click', ...))
+updating the textarea after row deletion.-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Table</title>
+
+    <style>
+        td, th {
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        tr {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<textarea id="text" rows="10" cols="40"></textarea>
+
+<br><br>
+
+<input type="text" id="delimiter">
+
+<button id="create">Create</button>
+
+<div id="table"></div>
+
+
+<script>
+
+    document.getElementById("create").addEventListener("click", function() {
+
+        let text = document.getElementById("text").value;
+        let delimiter = document.getElementById("delimiter").value;
+
+        // Го делиме текстот на редици
+        let lines = text.split("\n");
+
+        // Креираме табела
+        let table = document.createElement("table");
+
+        // Ги земаме сите редици
+        for (let i = 0; i < lines.length; i++) {
+
+            // Ја делиме редицата според delimiter
+            let values = lines[i].split(delimiter);
+
+            let row = document.createElement("tr");
+
+            // Првата редица е заглавие
+            if (i == 0) {
+
+                for (let j = 0; j < values.length; j++) {
+
+                    let th = document.createElement("th");
+
+                    th.innerHTML = values[j];
+
+                    row.appendChild(th);
+                }
+
+            } else {
+
+                // Останатите редици се обични редици
+                for (let j = 0; j < values.length; j++) {
+
+                    let td = document.createElement("td");
+
+                    td.innerHTML = values[j];
+
+                    row.appendChild(td);
+                }
+
+                // Кога ќе се кликне на редицата
+                row.addEventListener("click", function() {
+
+                    // Ја наоѓаме моменталната позиција на редицата
+                    let rowIndex = row.rowIndex;
+
+                    // Ја бришеме редицата од табелата
+                    row.remove();
+
+                    // Го земаме текстот од textarea
+                    let currentText = document.getElementById("text").value;
+
+                    // Го делиме текстот на редици
+                    let currentLines = currentText.split("\n");
+
+                    // Ја бришеме соодветната линија
+                    currentLines.splice(rowIndex, 1);
+
+                    // Го враќаме текстот во textarea
+                    document.getElementById("text").value =
+                        currentLines.join("\n");
+                });
+            }
+
+            table.appendChild(row);
+        }
+
+        // Ја ставаме табелата на страната
+        document.getElementById("table").innerHTML = "";
+        document.getElementById("table").appendChild(table);
+
+    });
+
+</script>
+
+</body>
+</html>

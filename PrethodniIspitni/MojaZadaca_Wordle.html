@@ -1,0 +1,128 @@
+<!--Даден е json string кој претставува листа од зборови со по пет букви. Стрингот треба да се испарсира и да се одбере збор по случаен избор (10 поени).
+ Потоа на страната преку код се додаваат пет input полиња, кои можат да примат по една буква (10 поени). Идејата е корисникот да го погоди случајно
+ избраниот збор. Кога корисникот ќе ги внесе сите пет букви се прави автоматска проверка на секоја од буквите (10 поени). Ако буквата од
+ внесениот збор е на иста позиција со истата таа буква од случајно избраниот збор, тогаш полето се бои зелено (10 поени). Ако буквата од зборот на
+ корисникот ја има во случајно избраниот збор, но не е на вистинското место се бои во жолто (10 поени). Во спротивно не се случува ништо. Боењето треба да е
+ постепено (10 поени). Ако корисникот не го погоди зборот се појавуваат нови пет полиња за корисникот да се обиде повторно (10 поени). Оваа постапка се
+ повторува се додека корисникот не го погоди случајно избраниот збор.
+
+Во моментот кога зборот ќе биде погоден играта завршува, не се појавуваат нови полиња и позадината се бои во зелена боја (10 поени).-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Game</title>
+
+    <style>
+        input {
+            width: 40px;
+            height: 40px;
+            font-size: 25px;
+            text-align: center;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="game"></div>
+
+<script>
+
+    let jsonString = '["apple", "house", "water", "green", "table", "mouse"]';
+
+    // Го парсираме JSON string-от
+    let words = JSON.parse(jsonString);
+
+    // Избираме случаен збор
+    let randomIndex = Math.floor(Math.random() * words.length);
+    let randomWord = words[randomIndex];
+
+    console.log(randomWord);
+
+    function createInputs() {
+
+        // Креираме нов div за еден обид
+        let div = document.createElement("div");
+
+        // Креираме 5 input полиња
+        for (let i = 0; i < 5; i++) {
+
+            let input = document.createElement("input");
+
+            input.maxLength = 1;
+
+            div.appendChild(input);
+        }
+
+        // Креираме копче
+        let button = document.createElement("button");
+        button.innerHTML = "Провери";
+
+        div.appendChild(button);
+
+        document.getElementById("game").appendChild(div);
+
+        button.onclick = function () {
+
+            let inputs = div.getElementsByTagName("input");
+
+            let userWord = "";
+
+            // Го земаме зборот од input полињата
+            for (let i = 0; i < 5; i++) {
+                userWord += inputs[i].value.toLowerCase();
+            }
+
+            // Проверуваме дали се внесени сите букви
+            if (userWord.length != 5) {
+                alert("Внесете ги сите 5 букви!");
+                return;
+            }
+
+            let correct = true;
+
+            // Проверка на секоја буква
+            for (let i = 0; i < 5; i++) {
+
+                if (userWord[i] == randomWord[i]) {
+
+                    // Иста буква и иста позиција
+                    inputs[i].style.backgroundColor = "green";
+
+                } else if (randomWord.includes(userWord[i])) {
+
+                    // Буквата постои, но не е на правилна позиција
+                    inputs[i].style.backgroundColor = "yellow";
+
+                    correct = false;
+
+                } else {
+
+                    // Буквата не постои во зборот
+                    correct = false;
+                }
+            }
+
+            // Ако зборот е погоден
+            if (correct) {
+
+                document.body.style.backgroundColor = "green";
+
+                alert("Го погодивте зборот!");
+
+            } else {
+
+                // Ако не е погоден, овозможуваме нов обид
+                createInputs();
+            }
+        };
+    }
+
+    // Го започнуваме првиот обид
+    createInputs();
+
+</script>
+
+</body>
+</html>
