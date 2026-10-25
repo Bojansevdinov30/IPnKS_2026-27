@@ -263,6 +263,7 @@ no). Под формата се наоѓаат сите досега уплат�
             let ball = document.createElement("div");
             ball.classList.add("ball");
             ball.innerHTML = `<p>${c}</p>`;
+            ball.style.backgroundColor=getRandomColor()
             container.append(ball);
         }
 
@@ -363,6 +364,12 @@ no). Под формата се наоѓаат сите досега уплат�
 
         // Do not remove the code from the Set:
         // that code has already been used.
+    }
+
+    function getRandomColor(){
+        return "#"+Math.floor(Math.random()*255).toString(16)
+            +Math.floor(Math.random()*255).toString(16)
+            +Math.floor(Math.random()*255).toString(16)
     }
 </script>
 

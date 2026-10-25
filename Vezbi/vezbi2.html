@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #bottomDiv{
+            display: flex;
+            justify-content: left;
+            align-items: center;
+        }
+        table{
+            border-collapse: collapse;
+        }
+        #firstTableDiv, #secondTableDiv{
+            margin: 20px;
+        }
+        tr{
+            border: 1px solid black;
+        }
+        th, td{
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .row{
+            display: flex;
+        }
+        span{
+            font-weight: bold;
+        }
+
+        label{
+            width: 200px;
+            margin: 5px;
+        }
+        input:not([type = button]), select{
+            width: 200px;
+            margin: 5px;
+        }
+        h1{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Online Shop</h1>
+<div id = "topDiv">
+    <div class = "row">
+        <label for="name">Name and surname</label>
+        <input type="text" id="name">
+    </div>
+
+    <div class = "row">
+        <label for="item">Item</label>
+        <input type="text" id="item">
+    </div>
+
+    <div class = "row">
+        <label for="code">Item code</label>
+        <input type="text" id="code">
+    </div>
+
+    <div class = "row">
+        <label for="description">Item description</label>
+        <input type="text" id="description">
+    </div>
+
+    <div class = "row">
+        <label for="price">Price</label>
+        <input type="text" id="price">
+    </div>
+
+    <div class = "row">
+        <label for="usedSelect">Used</label>
+        <select id="usedSelect">
+            <option id="used">used</option>
+            <option id="unused">unused</option>
+        </select>
+    </div>
+
+    <input type="button" value="Add" onclick="addToTable2()">
+
+    <p>Active items: <span id = "active">0</span></p>
+
+
+</div>
+<div id = "bottomDiv">
+    <div id = firstTableDiv>
+        <h2>Unused items</h2>
+        <table id="unusedTable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Code</th>
+                <th>Number</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id = secondTableDiv>
+        <h2>Used items</h2>
+        <table id="usedTable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Code</th>
+                <th>Number</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<script>
+    let usedItems = [];
+    let unusedItems = [];
+    let activeItems = 0;
+    let codes = new Set();
+    let unusedTable = document.getElementById("unusedTable");
+    let usedTable = document.getElementById("usedTable");
+
+    class Item{
+        constructor(name, item, code, description, price, usedSelect) {
+            this._name = name;
+            this._item = item;
+            this._code = code;
+            this._description = description;
+            this._price = price;
+            this._usedSelect = usedSelect;
+        }
+
+        get name() {
+            return this._name;
+        }
+
+        set name(value) {
+            this._name = value;
+        }
+
+        get item() {
+            return this._item;
+        }
+
+        set item(value) {
+            this._item = value;
+        }
+
+        get code() {
+            return this._code;
+        }
+
+        set code(value) {
+            this._code = value;
+        }
+
+        get description() {
+            return this._description;
+        }
+
+        set description(value) {
+            this._description = value;
+        }
+
+        get price() {
+            return this._price;
+        }
+
+        set price(value) {
+            this._price = value;
+        }
+
+        get usedSelect() {
+            return this._usedSelect;
+        }
+
+        set usedSelect(value) {
+            this._usedSelect = value;
+        }
+    }
+
+    function addToTable2() {
+        let name = document.getElementById("name").value;
+        let item = document.getElementById("item").value;
+        let code = document.getElementById("code").value;
+        let description = document.getElementById("description").value;
+        let price = document.getElementById("price").value;
+        let usedSelect = document.getElementById("usedSelect").value;
+
+        if(name == "" || item == "" || code == "" || description == "" || price == "" || usedSelect == ""){
+            alert("Please fill out the fields");
+            return;
+        }
+
+        if(codes.has(code)){
+            alert("Item with given code already exists");
+            return;
+        }
+
+        codes.add(code);
+
+        price = parseInt(price);
+
+        if(isNaN(price) || price <= 0){
+            alert("Enter a valid price");
+            return;
+        }
+
+        price = 1.1 * price;
+
+        let number = "";
+        for(let i = 0; i < code.length; i++) {
+            if(code[i] != "!" && isNaN(code[i])){
+                number += code[i];
+            }
+        }
+
+        let objekt = new Item(name, item, code, description, price, usedSelect);
+
+        activeItems += 1;
+        let active = document.getElementById("active");
+        active.innerHTML = activeItems;
+
+        let tr = document.createElement("tr");
+        let nameCell = document.createElement("td");
+        nameCell.innerText = name;
+        let itemCell = document.createElement("td");
+        itemCell.innerText = item;
+        let priceCell = document.createElement("td");
+        priceCell.innerText = parseInt(price);
+        let codeCell = document.createElement("td");
+        codeCell.innerText = code;
+        let numberCell = document.createElement("td");
+        numberCell.innerText = number;
+        let actionCell = document.createElement("td");
+        let actionBtn = document.createElement("input");
+        actionBtn.type = "button";
+        actionBtn.value = "Sold";
+        actionBtn.setAttribute("onclick", "sellItem(this)");
+        actionCell.appendChild(actionBtn);
+        tr.appendChild(nameCell);
+        tr.appendChild(itemCell);
+        tr.appendChild(priceCell);
+        tr.appendChild(codeCell);
+        tr.appendChild(numberCell);
+        tr.appendChild(actionCell);
+        if(usedSelect == "used"){
+            usedItems.push(objekt);
+            usedTable.appendChild(tr);
+        }else {
+            unusedItems.push(objekt);
+            unusedTable.appendChild(tr);
+        }
+
+
+    }
+
+    function sellItem(button){
+        let actionCell = button.parentElement;
+        let row = actionCell.parentElement;
+        activeItems--;
+        let active = document.getElementById("active");
+        active.innerHTML = activeItems;
+        row.style.backgroundColor = "yellow";
+        actionCell.innerHTML = "";
+    }
+</script>
+</body>
+</html>
