@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vezbi 3</title>
+    <style>
+        #cardContainerBefore, #cardContainerAfter {
+            display: flex;
+        }
+
+        .square {
+
+        }
+
+        .circle {
+            border-radius: 100%;
+        }
+
+        .card {
+            border: 1px solid black;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+        }
+
+        #formWrapper {
+            width: 500px;
+            height: 300px;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label, input:not([type = button]) {
+            width: 200px;
+            margin: 10px;
+        }
+
+        .innerDiv {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        p {
+            margin: 2px;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Random Game</h1>
+<div id="formWrapper">
+    <h2>Register Card</h2>
+    <div class="row">
+        <label for="name">Name:</label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="code">Code:</label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="value">Value:</label>
+        <input type="text" id="value">
+    </div>
+    <div class="row">
+        <label for="shape">Shape:</label>
+        <select id="shape">
+            <option value="circle">Circle</option>
+            <option value="square">Square</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="color">Color:</label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+            <option value="pink">Pink</option>
+        </select>
+    </div>
+    <input type="button" value="Add card" onclick="addCard()">
+</div>
+<div id="gameCardsWrapper">
+    <h2>Game cards</h2>
+    <input type="button" value="Start Game" onclick="startGame()">
+    <div id="cardContainerBefore">
+
+    </div>
+</div>
+<div id="randomGameWrapper" style="display: none">
+    <h2>Random Game</h2>
+    <h3>Game Cards</h3>
+    <h4>Total cost: <span id="totalCost"></span></h4>
+    <div id="cardContainerAfter">
+
+    </div>
+</div>
+<script>
+    let cardContainerBefore = document.getElementById("cardContainerBefore");
+    let cardContainerAfter = document.getElementById("cardContainerAfter");
+    let formWrapper = document.getElementById("formWrapper");
+    let gameCardsWrapper = document.getElementById("gameCardsWrapper");
+    let randomGameWrapper = document.getElementById("randomGameWrapper");
+    let totalCost = document.getElementById("totalCost");
+    let total = 0;
+    let moves = 0;
+    let sumOfValues = 0;
+
+    class Card {
+        constructor(name, code, value, shape, color) {
+            this.name = name;
+            this.code = code;
+            this.value = value;
+            this.shape = shape;
+            this.color = color;
+        }
+    }
+
+    let cards = [];
+    let positions = [];
+
+    function addCard() {
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let value = document.getElementById("value").value;
+        let shape = document.getElementById("shape").value;
+        let color = document.getElementById("color").value;
+
+        if (name == "" || code == "" || value == "" || shape == "" || color == "") {
+            alert("You have to fill out the form!");
+            return;
+        }
+
+        for (let i = 0; i < code.length; i++) {
+            if (!isNaN(code[i]) || code[i] == "#" || code[i] == "&" || (code[i] >= "a" && code[i] <= "z")) {
+                alert("Invalid code!");
+                return;
+            }
+        }
+
+        value = parseInt(value);
+        let card = new Card(name, code, value, shape, color);
+
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+
+        if (shape == "circle") {
+            cardDiv.classList.add("circle");
+        } else {
+            cardDiv.classList.add("square");
+        }
+
+        cardDiv.style.backgroundColor = color;
+
+        cardDiv.innerHTML = `<div class = "innerDiv">
+                              <p class = "cardName">Name: ${name}</p>
+                              <p class = "cardCode">Code: ${code}</p>
+                              <p class = "cardValue">Value: ${value}</p>
+                              </div>`;
+        cardDiv.dataset.code = code;
+        cards.push(cardDiv);
+        positions.push(cards.length);
+        cardDiv.dataset.position = String(cards.length);
+        cardDiv.dataset.shape = shape;
+        cardContainerBefore.appendChild(cardDiv);
+
+    }
+
+    // function makeCard(card){
+    //     let cardDiv = document.createElement("div");
+    //
+    // }
+
+    function startGame() {
+        formWrapper.style.display = "none";
+        gameCardsWrapper.style.display = "none";
+        randomGameWrapper.style.display = "";
+        shuffle(positions);
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].randomPosition = positions[i];
+            cards[i].randomShape = (Math.random() > 0.5) ? "square" : "circle";
+            let card = cards[i];
+
+            let innerDiv = card.querySelectorAll(".innerDiv")[0];
+            let p1 = document.createElement("p");
+            p1.setAttribute("class", "desiredPosition");
+            p1.innerText = `Position: ${card.randomPosition}`;
+            innerDiv.appendChild(p1);
+            let p2 = document.createElement("p");
+            p2.setAttribute("class", "desiredShape");
+            p2.innerText = `Shape: ${card.randomShape}`;
+            innerDiv.appendChild(p2);
+
+            let buttonDiv = document.createElement("div");
+            let leftButton = document.createElement("input");
+            leftButton.setAttribute("type", "button");
+            leftButton.setAttribute("value", "<");
+            leftButton.setAttribute("onclick", "moveLeft(this)");
+            buttonDiv.appendChild(leftButton);
+            let rightButton = document.createElement("input");
+            rightButton.setAttribute("type", "button");
+            rightButton.setAttribute("value", ">");
+            rightButton.setAttribute("onclick", "moveRight(this)");
+            buttonDiv.appendChild(rightButton);
+
+            innerDiv.appendChild(buttonDiv);
+
+            let shapeButton = document.createElement("input");
+            shapeButton.setAttribute("type", "button");
+            shapeButton.setAttribute("value", "Change Shape");
+            shapeButton.setAttribute("onclick", "changeShape(this)");
+            innerDiv.appendChild(shapeButton);
+        }
+
+        updateCards();
+
+    }
+
+    function moveLeft(button) {
+        let card = button.parentElement.parentElement.parentElement;
+        if (parseInt(card.dataset.position) === 1) {
+            return;
+        }
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i] == card) {
+                cards[i].dataset.position = String(parseInt(card.dataset.position) - 1);
+                cards[i - 1].dataset.position = String(parseInt(card.dataset.position) + 1);
+                [cards[i - 1], cards[i]] = [cards[i], cards[i - 1]];
+                break;
+            }
+        }
+        moves++;
+        updateCards();
+
+    }
+
+    function moveRight(button) {
+        let card = button.parentElement.parentElement.parentElement;
+        if (parseInt(card.dataset.position) === cards.length) {
+            return;
+        }
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i] == card) {
+                cards[i].dataset.position = String(parseInt(card.dataset.position) + 1);
+                cards[i + 1].dataset.position = String(parseInt(card.dataset.position) - 1);
+                [cards[i], cards[i + 1]] = [cards[i + 1], cards[i]];
+                break;
+            }
+        }
+        moves++;
+        updateCards();
+    }
+
+    function changeShape(button) {
+        let card = button.parentElement.parentElement;
+        if (card.classList.contains("circle")) {
+            card.classList.remove("circle");
+            card.classList.add("square");
+            card.dataset.shape = "square";
+        } else {
+            card.classList.remove("square");
+            card.classList.add("circle");
+            card.dataset.shape = "circle";
+        }
+        moves++;
+        updateCards();
+    }
+
+    function updateCards() {
+        sumOfValues=0;
+        for (let i = 0; i < cards.length; i++) {
+            cardContainerAfter.appendChild(cards[i]);
+            sumOfValues += parseInt(cards[i].querySelector(".cardValue").textContent.slice(7));
+        }
+        calculateMistake();
+    }
+
+    function calculateMistake() {
+        let mistake = 0;
+        for (let i = 0; i < cards.length; i++) {
+            let position = parseInt(cards[i].dataset.position);
+            let desiredPosition = parseInt(cards[i].querySelector(".desiredPosition").textContent);
+            let shape = cards[i].dataset.shape;
+            let desiredShape = cards[i].querySelector(".desiredShape").textContent;
+            mistake += Math.abs(desiredPosition - position) * 50 + (desiredShape !== shape) ? 30 : 0;
+        }
+
+        if(mistake == 0){
+            mistake = sumOfValues - moves*10;
+        }
+        totalCost.innerText = `${mistake}`;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+</script>
+</body>
+</html>

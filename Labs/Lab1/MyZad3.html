@@ -1,0 +1,64 @@
+<!--Zadacha 3. Vnesuvash forma krug ili kvadrat pa strana ili radius pechati perimetar i ploshtina i za kolku pati e pomal/pogolem perimetarot od ploshtinata-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadaca 3</title>
+</head>
+<body>
+<script>
+    let forma = prompt("Vnesete krug ili kvadrat");
+    if (forma == "krug") {
+        let radius = prompt("Vnesete radius");
+        radius = parseFloat(radius);
+        let area = radius * radius * Math.PI;
+        let perimeter = 2 * Math.PI * radius;
+        console.log(perimeter);
+        console.log(area);
+        if (perimeter > area) {
+            let times = perimeter / area;
+            console.log(`Perimeter is ${times.toFixed(2)} times bigger than area`);
+            let p = document.createElement("p");
+            p.innerHTML = `Perimeter is ${times.toFixed(2)} times bigger than area`;
+            document.body.appendChild(p);
+        } else if (area > perimeter) {
+            let times = area / perimeter;
+            console.log(`Perimeter is ${times.toFixed(2)} times smaller than area`);
+            let p = document.createElement("p");
+            p.innerHTML = `Perimeter is ${times.toFixed(2)} times smaller than area`;
+            document.body.appendChild(p);
+        } else {
+            console.log("Perimeter and area are equal");
+            let p = document.createElement("p");
+            p.innerHTML = "Perimeter and area are equal";
+            document.body.appendChild(p);
+        }
+    }else if(forma == "kvadrat") {
+        let strana = prompt("Vnesete strana");
+        strana = parseFloat(strana);
+        let area = strana * strana;
+        let perimeter = 4 * strana;
+        console.log(perimeter);
+        console.log(area);
+        if (perimeter > area) {
+            let times = perimeter / area;
+            console.log(`Perimeter is ${times.toFixed(2)} times bigger than area`);
+            let p = document.createElement("p");
+            p.innerHTML = `Perimeter is ${times.toFixed(2)} times bigger than area`;
+            document.body.appendChild(p);
+        } else if (area > perimeter) {
+            let times = area / perimeter;
+            console.log(`Perimeter is ${times.toFixed(2)} times smaller than area`);
+            let p = document.createElement("p");
+            p.innerHTML = `Perimeter is ${times.toFixed(2)} times smaller than area`;
+            document.body.appendChild(p);
+        } else {
+            console.log("Perimeter and area are equal");
+            let p = document.createElement("p");
+            p.innerHTML = "Perimeter and area are equal";
+            document.body.appendChild(p);
+        }
+    }
+</script>
+</body>
+</html>

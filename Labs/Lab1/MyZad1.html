@@ -1,0 +1,66 @@
+<!--Zadacha 1. Pretvaranje celzius vo farenhait i obratno-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadaca 1</title>
+    <style>
+        #wrapper{
+            width: 500px;
+            height: 500px;
+        }
+        .row{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input{
+            margin: 10px;
+        }
+        label{
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id = "wrapper">
+<div class = "row">
+<label for="temp">Temperature</label>
+<input type="text" id="temp">
+</div>
+<div class = "row">
+    <label for="fahrenheit">Fahrenheit</label>
+    <input type="radio" value = "fahrenheit" id="fahrenheit" name="from">
+    <label for="celsius">Celsius</label>
+    <input type="radio" value = "celsius" id="celsius" name="from">
+</div>
+<input type="button" onclick="convert()" value="Convert">
+</div>
+<input type="text" id = "total" readonly>
+<script>
+    function convert() {
+        let temp = document.getElementById("temp").value;
+        let fahrenheit = document.getElementById("fahrenheit");
+        let celsius = document.getElementById("celsius");
+        let output = document.getElementById("total");
+        if(celsius.checked){
+            let tempInCelsius = parseInt(temp);
+            output.value = 9 * tempInCelsius / 5 + 32;
+        }else if(fahrenheit.checked){
+            let tempInFahrenheit = parseInt(temp);
+            output.value = 5 / 9 * (tempInFahrenheit - 32);
+        }
+    }
+</script>
+<script>
+    let tempInCelsius = prompt("Please enter temperature in celsius", 0);
+    tempInCelsius = parseFloat(tempInCelsius);
+    alert("The temperature in fahrenheit is: " + (9 * tempInCelsius / 5 + 32));
+
+    let tempInFahrenheit = prompt("Please enter temperature in fahrenheit", 0);
+    tempInFahrenheit = parseFloat(tempInFahrenheit);
+    alert("The temperature in celsius is: " + 5 / 9 * (tempInFahrenheit - 32));
+</script>
+</body>
+</html>

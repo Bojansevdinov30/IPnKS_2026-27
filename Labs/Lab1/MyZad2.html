@@ -1,0 +1,45 @@
+<!--Zadacha 2. Vnesuvas dva broja dali nivniot zbir e palindrom-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadaca2</title>
+</head>
+<body>
+<script>
+    let number1 = parseInt(prompt("Please enter the first number"));
+    let number2 = parseInt(prompt("Please enter the second number"));
+    let sum = number1 + number2;
+    sum = String(sum);
+    let left = 0;
+    let right = sum.length - 1;
+    let isPalindrome = true;
+    while (left <= right) {
+        if (sum[left] != sum[right]) {
+            isPalindrome = false;
+            break;
+        }
+        left++;
+        right--;
+    }
+    if (isPalindrome) {
+        alert("The sum of the numbers is a palindrome");
+    } else {
+        alert("The sum of the numbers is not a palindrome");
+    }
+</script>
+<script>
+    let number1 = parseInt(prompt("Enter the first number"));
+    let number2 = parseInt(prompt("Enter the second number"));
+
+    let sum = String(number1 + number2);
+    let reversed = sum.split("").reverse().join("");
+
+    if (sum === reversed) {
+        alert("The sum is a palindrome");
+    } else {
+        alert("The sum is not a palindrome");
+    }
+</script>
+</body>
+</html>

@@ -104,7 +104,7 @@ ime_prezime_indeks.html
   function removeDiv(div){
     clicked=document.getElementById("clicked")
     div.setAttribute("onclick","removeDivBack(this)")
-    clicked.appendChild(div)
+    clicked.appendChild(div) // automatically removes it from the previous div
   }
   function removeDivBack(div){
     generated=document.getElementById("generated")
