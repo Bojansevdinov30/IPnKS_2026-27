@@ -1,0 +1,62 @@
+<!--Домен од URL-адреса / Domain from a URL
+
+МК
+
+Пребарувачите и прелистувачите често го прикажуваат само доменот на страницата, без остатокот од адресата.
+
+Напишете ја функцијата getDomain(url) која го враќа доменот од дадената URL-адреса. Постапете по следниов редослед:
+
+претворете ја целата адреса во мали букви;
+ако адресата започнува со http:// или https://, отстранете го тој дел;
+ако она што останало започнува со www., отстранете го и тој дел;
+доменот е делот од преостанатиот текст до првото појавување на некој од знаците /, ?, # или :; ако нема таков знак, доменот е целиот текст што останал.
+
+Адресата секогаш започнува со http://, https:// или директно со доменот.
+
+Помош: користи се методите startsWith(), slice() и indexOf().
+
+Во полето за одговор е дадена HTML-страница со функцијата. Напишете го телото на функцијата; може да додадете и помошни функции. Функцијата не чита влезни податоци
+со prompt и не прикажува пораки со alert, туку само го враќа резултатот со return. Копчето Check ја проверува функцијата со 5 теста, секој носи 0,2 поени.-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function getDomain(url) {
+        url = url.toLowerCase();
+        console.log(url);
+        // moze i vaka
+        // if(url.startsWith("https://")){
+        //     url = url.slice(8);
+        // }
+        // else if(url.startsWith("http://")){
+        //     url = url.slice(7);
+        // }
+        if(url.startsWith("http://") || url.startsWith("https://")){
+            url = url.slice(url.indexOf("/")+2);
+        }
+        console.log(url);
+        if(url.startsWith("www.")){
+            url = url.slice(url.indexOf("www.")+4);
+        }
+        console.log(url);
+        if(url.indexOf("/") != -1){
+            url = url.slice(0,url.indexOf("/"));
+        }
+        if(url.indexOf("?") != -1){
+            url = url.slice(0,url.indexOf("?"));
+        }
+        if(url.indexOf("#") != -1){
+            url = url.slice(0,url.indexOf("#"));
+        }
+        if(url.indexOf(":") != -1){
+            url = url.slice(0,url.indexOf(":"));
+        }
+        console.log(url);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!--При регистрација на веб-страница, лозинката што ја внесува корисникот мора да биде доволно силна.
+
+Напишете ја функцијата isStrongPassword(password) која враќа true ако лозинката е силна, а false во спротивно. Лозинката е силна ако
+ги исполнува сите четири услови:
+
+има најмалку 8 знаци;
+содржи барем една голема буква (A–Z);
+содржи барем една мала буква (a–z);
+содржи барем една цифра (0–9).
+
+Дозволени се и други знаци (празни места, интерпункциски знаци и сл.) и тие се бројат во должината.
+
+Помош: знакот ch е голема буква ако важи ch >= "A" && ch <= "Z". На ист начин се проверуваат малите букви и цифрите.
+
+Во полето за одговор е дадена HTML-страница со функцијата. Напишете го телото на функцијата; може да додадете и помошни функции. Функцијата не чита влезни
+податоци со prompt и не прикажува пораки со alert, туку само го враќа резултатот со return. Копчето Check ја проверува функцијата со 5 теста, секој
+носи 0,2 поени.-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyZad1</title>
+</head>
+<body>
+<script>
+    function isStrongPassword(password){
+        let hasUpper = false;
+        let hasLower = false;
+        let hasDigit = false;
+        if(password.length < 8){
+            return false;
+        }
+
+        for (let i = 0; i < password.length; i++) {
+            if(password.charAt(i) >= "A" && password.charAt(i) <= "Z"){
+                hasUpper = true;
+            }
+            if(password.charAt(i) >= "a" && password.charAt(i) <= "z"){
+                hasLower = true;
+            }
+            if(password.charAt(i) >= "0" && password.charAt(i) <= "9"){
+                hasDigit = true;
+            }
+            // moze i vaka:
+            // if(!isNaN(password.charAt(i))){
+            //     hasDigit = true;
+            // }
+        }
+
+        if(hasUpper && hasLower && hasDigit){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+</script>
+</body>
+</html>
