@@ -1,0 +1,46 @@
+<!--МК
+
+При креирање профил на веб-страница, корисничкото име мора да биде во согласност со правилата на страницата.
+
+Напишете ја функцијата isValidUsername(username) која враќа true ако корисничкото име е валидно, а false во спротивно. Корисничкото име е валидно ако:
+
+има најмалку 3, а најмногу 15 знаци;
+содржи само мали латинични букви (a–z), цифри (0–9) и долна црта (_);
+започнува со буква.
+Помош: знакот ch е мала буква ако важи ch >= "a" && ch <= "z".
+
+Во полето за одговор е дадена HTML-страница со функцијата. Напишете го телото на функцијата; може да додадете и помошни функции. Функцијата не чита влезни податоци со prompt и не прикажува пораки со alert, туку само го враќа резултатот со return. Копчето Check ја проверува функцијата со 5 теста, секој носи 0,2 поени.-->
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <title>Корисничко име</title>
+</head>
+<body>
+<script>
+    /**
+     * Корисничко име / Username
+     * @param {string} username
+     * @returns {boolean}
+     */
+    function isValidUsername(username) {
+        if(username.length <3 || username.length > 15){
+            return false;
+        }
+        if(!(username.charAt(0) >= "a" && username.charAt(0) <="z")){
+            return false;
+        }
+        for (let i = 0; i < username.length; i++) {
+            if(!(username.charAt(i) >="a" && username.charAt(i) <="z") && !(username.charAt(i) >="0" && username.charAt(i) <="9") && !(username.charAt(i) == "_")){
+                return false;
+            }
+        }
+        return true;
+        // Вашиот код / Your code
+    }
+
+    // Пробајте ја функцијата во прелистувач (F12 → Console) / Try the function in a browser (F12 → Console):
+    console.log(isValidUsername("petar_99"));
+</script>
+</body>
+</html>

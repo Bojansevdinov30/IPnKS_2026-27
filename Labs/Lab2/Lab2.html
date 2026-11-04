@@ -1,0 +1,62 @@
+<!--МК
+
+Корисниците често го пополнуваат полето „Име и презиме“ неуредно: со вишок празни места и со измешани големи и мали букви.
+
+Напишете ја функцијата formatName(fullName) која го враќа името во уреден облик:
+
+празните места на почетокот и на крајот се отстрануваат;
+зборовите се одделени со точно едно празно место;
+секој збор започнува со голема буква, а останатите букви во него се мали.
+Влезот содржи само латинични букви и празни места. Ако нема ниту една буква, функцијата враќа празен стринг "".
+
+Помош: нов збор започнува кога буквата е првиот знак во стрингот или кога пред неа има празно место.
+
+Во полето за одговор е дадена HTML-страница со функцијата. Напишете го телото на функцијата; може да додадете и помошни функции. Функцијата не чита влезни податоци со prompt и не прикажува пораки со alert, туку само го враќа резултатот со return. Копчето Check ја проверува функцијата со 5 теста, секој носи 0,2 поени.-->
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <title>Уредно име и презиме</title>
+</head>
+<body>
+<script>
+    /**
+     * Уредно име и презиме / Tidy full name
+     * @param {string} fullName
+     * @returns {string}
+     */
+    function formatName(fullName) {
+        //console.log(fullName);
+        fullName = fullName.trim();
+        if(fullName.length === 0){
+            return "";
+        }
+        //console.log(fullName);
+        // for (let i = 0; i>fullName.length; i++){
+        //
+        // }
+        fullName = fullName.replace(/\W+/g, " ");
+        //console.log(fullName);
+        fullName = fullName.toLowerCase();
+        //console.log(fullName);
+        // if(fullName.indexOf(" ") != -1)
+        //     fullName = fullName[0].toUpperCase() + fullName.slice(1, fullName.indexOf(" ")+1) + fullName.charAt(fullName.indexOf(" ") + 1).toUpperCase() + fullName.slice(fullName.indexOf(" ")+2);
+        let fullNameFinal = fullName[0].toUpperCase();
+        for (let i = 1; i< fullName.length; i++){
+            let ch = fullName.charAt(i);
+            if(fullName.charAt(i-1) === " "){
+                ch = ch.toUpperCase();
+            }
+            fullNameFinal += ch;
+        }
+        fullName = fullNameFinal;
+        //console.log(fullName);
+        return fullName;
+        // Вашиот код / Your code
+    }
+
+    // Пробајте ја функцијата во прелистувач (F12 → Console) / Try the function in a browser (F12 → Console):
+    console.log(formatName("  pETAR   petrovski "));
+</script>
+</body>
+</html>

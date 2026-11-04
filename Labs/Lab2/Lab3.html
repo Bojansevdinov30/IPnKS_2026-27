@@ -1,0 +1,65 @@
+<!--МК
+
+Во URL-адресата, по знакот ? можат да следуваат параметри во облик име=вредност, одделени со знакот &. На пример, во адресата https://shop.mk/search?q=laptop&page=2 параметарот q има вредност laptop, а параметарот page има вредност 2.
+
+Напишете ја функцијата getQueryParam(url, name) која ја враќа вредноста на параметарот со име name. Постапете по следниов редослед:
+
+ако адресата содржи #, отстранете го тој знак и сè што следува по него;
+ако во она што останало нема знак ?, вратете null;
+параметрите се сè што следува по првиот ?; разгледајте ги еден по еден (одделени се со &);
+вратете ја вредноста на првиот параметар чие име е точно еднакво на name, при што се прави разлика меѓу големи и мали букви. Ако таков параметар нема, вратете null.
+Секој параметар го содржи знакот =, а вредноста може да биде и празен стринг (на пример q=).
+
+Помош: внимавајте — параметарот page не е параметар со име age, иако го содржи текстот „age“.
+
+Во полето за одговор е дадена HTML-страница со функцијата. Напишете го телото на функцијата; може да додадете и помошни функции. Функцијата не чита влезни податоци со prompt и не прикажува пораки со alert, туку само го враќа резултатот со return. Копчето Check ја проверува функцијата со 5 теста, секој носи 0,2 поени.-->
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <title>Параметар од URL-адреса</title>
+</head>
+<body>
+<script>
+    /**
+     * Параметар од URL-адреса / Parameter from a URL
+     * @param {string} url
+     * @param {string} name
+     * @returns {string|null}
+     */
+    function getQueryParam(url, name) {
+        if(url.indexOf("#") != -1){
+            url = url.slice(0, url.indexOf("#"));
+        }
+        console.log(url);
+        if(url.indexOf("?") == -1){
+            return null;
+        }
+        if(url.indexOf(name) === -1){
+            return null;
+        }
+        url = url.slice(url.indexOf("?")+1);
+        console.log(url);
+        let pieces = url.split("&");
+        console.log(pieces);
+        for (let i =0; i<pieces.length; i++){
+            //console.log(pieces[1]);
+            //console.log(pieces[1].includes(name));
+            if(pieces[i].indexOf(name) !== -1){
+                if(pieces[i].indexOf(name) !=0){
+                    continue;
+                }
+                console.log(pieces[i]);
+                return pieces[i].slice(pieces[i].indexOf("=") +1 );
+            }
+        }
+        return null;
+        // Вашиот код / Your code
+    }
+
+
+    // Пробајте ја функцијата во прелистувач (F12 → Console) / Try the function in a browser (F12 → Console):
+    console.log(getQueryParam("https://shop.mk/search?q=laptop&page=2", "page"));
+</script>
+</body>
+</html>
