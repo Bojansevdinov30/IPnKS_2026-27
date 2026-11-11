@@ -1,0 +1,29 @@
+<!--Tretata rang lista niza od poveke rezultati i treba da se ispechati rangot na sekoe
+Pr [70, 95, 85] treba da bide [3, 1, 2]-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function ranks(array){
+      let array2 = [...array].sort((a, b) => b - a);
+      array2 = [...new Set(array2)];
+      let arrayFinal = new Array(array.length);
+      for(let i = 0; i < array.length; i++){
+        arrayFinal[i] = array2.indexOf(array[i]) + 1;
+      }
+      console.log(arrayFinal);
+    }
+    function ranks2(array) {
+      let sorted = [...new Set(array)].sort((a, b) => b - a);
+
+      let result = array.map(item => sorted.indexOf(item) + 1);
+
+      console.log(result);
+    }
+</script>
+</body>
+</html>

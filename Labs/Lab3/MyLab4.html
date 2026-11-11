@@ -1,0 +1,33 @@
+<!--Prvata beshe product rating i trebashe rating da bide cel bro i izmegu 1 i 5 i da ispechati average rating-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function ratings(array){
+        array = array.map(item => parseInt(item));
+        array = array.filter(item => item >=1 && item <= 5);
+        let avg =0;
+        for (let i = 0; i < array.length - 1; i++) {
+            avg+=array[i];
+        }
+        avg = avg / array.length;
+        console.log(avg);
+    }
+    function ratings2(array) {
+        let validRatings = array
+            .map(item => parseInt(item))
+            .filter(item => item >= 1 && item <= 5);
+
+        let sum = validRatings.reduce((total, item) => total + item, 0);
+
+        let avg = validRatings.length > 0 ? sum / validRatings.length : 0;
+
+        console.log(avg);
+    }
+</script>
+</body>
+</html>

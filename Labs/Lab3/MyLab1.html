@@ -1,0 +1,25 @@
+<!--1. Students
+Only point array given
+Exclude all <= 50 points
+dont count null
+Check for empty array
+Return procent passed (passed/total*100)-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function students(students) {
+        students = students.map(points => parseInt(points));
+        students = students.filter(value => value>50);
+        console.log(students);
+        if (students.length == 0 || students == null) {
+            return []
+        }
+    }
+</script>
+</body>
+</html>

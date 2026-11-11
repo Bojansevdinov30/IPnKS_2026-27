@@ -1,0 +1,23 @@
+<!--2. array of strings given
+Remove whitespaces from end and start (trim)
+Lowercase
+Keep first instance found
+Check for empty array/element
+Return new string array-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function foo(list) {
+        list = list.map(string => string.trim());
+        list = list.map(string => string.toLowerCase());
+        list = [...new Set(list)];
+        console.log(list);
+    }
+</script>
+</body>
+</html>

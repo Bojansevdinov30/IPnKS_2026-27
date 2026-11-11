@@ -1,0 +1,34 @@
+<!--Vtorata beshe balance negativen broj e odliv na sredstva pozitevn priliv ama ne ja pamtam ubavo-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function balance(transactions) {
+        let result = transactions.reduce((acc, item) => {
+            if (item > 0) {
+                acc.inflow += item;
+            }
+            else if (item < 0) {
+                acc.outflow += Math.abs(item);
+            }
+
+            acc.balance += item;
+
+            return acc;
+        }, {
+            inflow: 0,
+            outflow: 0,
+            balance: 0
+        });
+
+        console.log("Total inflow: " + result.inflow);
+        console.log("Total outflow: " + result.outflow);
+        console.log("Final balance: " + result.balance);
+    }
+</script>
+</body>
+</html>
