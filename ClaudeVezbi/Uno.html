@@ -1,0 +1,325 @@
+<!--А6. УНО
+Да се направи веб-страница за упростена верзија на играта УНО за два играчи. Во горниот дел на веб-страницата се внесуваат податоци за картичката и тоа: код на картичката, боја (red, green, blue, yellow), вредност (од паѓачка листа: 0–9, Skip, +2) и преку radio копчиња играчот кој ја добива картичката (Player 1, Player 2). При кликнување на копчето Add, ако сите полиња се пополнети, картичката се додава во раката (контејнерот) на избраниот играч, обоена во нејзината боја, а полињата не се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали кодот е во формат буква, цифра, буква (на пример a1b), дали е уникатен и дали играчот има помалку од 7 картички во раката (15 поени). Под насловот на секој играч се прикажува бројач на картичките што му се во раката (5 поени). Со клик на Start game (дозволено ако секој играч има најмалку 3 картички) формата се оневозможува, во средина се генерира случајна картичка (случајна боја и број 0–9) која е „масата“, на ред е Играч 1, а картичките на Играч 2 се сиви и не реагираат на клик (15 поени). Со клик на картичка од раката на играчот кој е на ред, потезот е валиден ако картичката има иста боја или иста вредност како картичката на масата. Картичката тогаш го заменува претходната на масата, се брише од раката (и од низа во која се чуваат картите на играчот) и редот се пренесува на другиот играч (15 поени). Ако потезот не е валиден, се прикажува порака за грешка, а играчот добива една казнена картичка со случајна боја и вредност (0–9) и редот преминува на другиот играч (10 поени). Ако е играна картичка Skip, пратникот го губи потезот (редот останува на истиот играч), а ако е играна +2, пратникот добива две нови случајни картички и редот преминува на него (10 поени). Првиот играч кој ќе ја испразни раката е победник, се печати порака, а сите картички се оневозможуваат (10 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[Code][Color ▼][Value ▼] (•)Player 1 ( )Player 2 [Add] [Start game]
+
+Играч 1 (4 картички)     Маса          Играч 2 (3 картички)
+[5 R][2 B][Skip G][7 Y]  [ 7 R ]    [3 G][+2 Y][9 R]
+↑ на ред                                  (сиво)-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            border: 1px solid black;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #firstCardsContainer, #secondCardsContainer, #tableCard {
+            min-width: 100px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin: 50px;
+        }
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class=row>
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class=row>
+        <label for="color">Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+        </select>
+    </div>
+    <div class=row>
+        <label for="value">Value: </label>
+        <select id="value">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="skip">Skip</option>
+            <option value="plus2">+2</option>
+        </select>
+    </div>
+    <div class=row>
+        <label for="player1">Player 1: </label>
+        <input type="radio" id="player1" value="player1" name="player">
+        <label for="player2">Player 2: </label>
+        <input type="radio" id="player2" value="player2" name="player">
+    </div>
+    <button onclick="addCard()">Add</button>
+    <button onclick="startGame()">Start game</button>
+</div>
+
+<div id="gameContainer">
+    <div id="firstPlayerContainer">
+        <p>Player 1: <span id="numberOfCardsFirst">0</span></p>
+        <br>
+        <div id="firstCardsContainer">
+
+        </div>
+    </div>
+    <div id="table">
+        <p>Table</p>
+        <br>
+        <div id="tableCard">
+
+        </div>
+    </div>
+    <div id="secondPlayerContainer">
+        <p>Player 2: <span id="numberOfCardsSecond">0</span></p>
+        <br>
+        <div id="secondCardsContainer">
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    let cardsFirst = [];
+    let cardsSecond = [];
+    let codes = [];
+
+    let nextUp = 1;
+
+    function addCard() {
+        let code = document.getElementById("code").value;
+        let color = document.getElementById("color").value;
+        let value = document.getElementById("value").value;
+        let player1 = document.getElementById("player1").checked;
+        let player2 = document.getElementById("player2").checked;
+
+        if (code == "" || color == "" || value == "" || (!player1 && !player2)) {
+            alert("Enter all fields")
+            return;
+        }
+
+        if (!/^[a-zA-Z][0-9][a-zA-Z]$/.test(code) || codes.includes(code)) {
+            alert("Please enter a valid code")
+            return;
+        }
+
+        if (player1 && cardsFirst.length >= 7 || player2 && cardsSecond.length >= 7) {
+            alert("Maximum number of cards reached")
+            return;
+        }
+
+        codes.push(code);
+
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.style.color = color;
+        cardDiv.style.borderColor = color;
+        cardDiv.innerHTML = `${value} ${color}`
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.color = color;
+        cardDiv.dataset.number = value;
+        cardDiv.id = code;
+        cardDiv.setAttribute("onclick", "playCard(this)");
+
+        if (player1) {
+            cardsFirst.push(cardDiv);
+        } else {
+            cardsSecond.push(cardDiv);
+        }
+
+        updateCards();
+    }
+
+    function updateCards() {
+        let container1 = document.getElementById("firstCardsContainer");
+        let container2 = document.getElementById("secondCardsContainer");
+
+        container1.innerHTML = "";
+        container2.innerHTML = "";
+
+        let counter1 = document.getElementById("numberOfCardsFirst");
+        let counter2 = document.getElementById("numberOfCardsSecond");
+        counter1.innerHTML = String(cardsFirst.length);
+        counter2.innerHTML = String(cardsSecond.length);
+        for (let i = 0; i < cardsFirst.length; i++) {
+            container1.appendChild(cardsFirst[i]);
+        }
+
+        for (let i = 0; i < cardsSecond.length; i++) {
+            container2.appendChild(cardsSecond[i]);
+        }
+    }
+
+    function startGame() {
+        if (cardsFirst.length < 3 || cardsSecond.length < 3) {
+            alert("Players need at least 3 cards each to play");
+            return;
+        }
+
+        let form = document.getElementById("form");
+        form.style.display = "none";
+
+        generateCard();
+
+        play();
+    }
+
+    function play() {
+        if (nextUp == 1) {
+            document.getElementById("firstCardsContainer").style.display = "flex";
+            document.getElementById("secondCardsContainer").style.display = "none";
+        } else {
+            document.getElementById("firstCardsContainer").style.display = "none";
+            document.getElementById("secondCardsContainer").style.display = "flex";
+        }
+    }
+
+    function playCard(card) {
+        let tableCard = document.getElementById("tableCard").children[0];
+        if (tableCard.dataset.color != card.dataset.color && tableCard.dataset.number != card.dataset.number) {
+            alert("Invalid card, you are penalized")
+            let cardDiv = getRandomCard();
+            cardDiv.setAttribute("onclick", "playCard(this)");
+            if (nextUp == 1) {
+                cardsFirst.push(cardDiv);
+                updateCards();
+                nextUp = 2;
+                play();
+            } else {
+                cardsSecond.push(cardDiv);
+                updateCards();
+                nextUp = 1;
+                play();
+            }
+
+            return;
+        }
+        let tableCardDiv = document.getElementById("tableCard");
+        tableCardDiv.innerHTML = "";
+        card.setAttribute("onclick", "");
+        tableCardDiv.appendChild(card);
+
+        if (nextUp == 1) {
+            cardsFirst.splice(cardsFirst.indexOf(card), 1);
+            if (card.dataset.number == "plus2") {
+                let cardDiv = getRandomCard();
+                cardDiv.setAttribute("onclick", "playCard(this)");
+                cardsSecond.push(cardDiv);
+                cardDiv = getRandomCard();
+                cardDiv.setAttribute("onclick", "playCard(this)");
+                cardsSecond.push(cardDiv);
+            }
+            updateCards();
+            if (card.dataset.number == "skip") {
+                nextUp = 1;
+            } else {
+                nextUp = 2;
+            }
+            play();
+        } else {
+            cardsSecond.splice(cardsSecond.indexOf(card), 1);
+            if (card.dataset.number == "plus2") {
+                let cardDiv = getRandomCard();
+                cardDiv.setAttribute("onclick", "playCard(this)");
+                cardsFirst.push(cardDiv);
+                cardDiv = getRandomCard();
+                cardDiv.setAttribute("onclick", "playCard(this)");
+                cardsFirst.push(cardDiv);
+            }
+            updateCards();
+            if (card.dataset.number == "skip") {
+                nextUp = 2;
+            } else {
+                nextUp = 1;
+            }
+            play();
+        }
+
+        checkWinner()
+    }
+
+    function generateCard() {
+        let cardDiv = getRandomCard();
+        let container = document.getElementById("tableCard");
+        container.appendChild(cardDiv);
+
+    }
+
+    function getRandomCard() {
+        let number = Math.floor(Math.random() * 10);
+        let color = Math.floor(Math.random() * 4);
+        switch (color) {
+            case 0:
+                color = "red";
+                break;
+            case 1:
+                color = "green";
+                break;
+            case 2:
+                color = "blue";
+                break;
+            case 3:
+                color = "yellow";
+                break;
+        }
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.style.color = color;
+        cardDiv.style.borderColor = color;
+        cardDiv.innerHTML = `${number} ${color}`
+        cardDiv.dataset.color = String(color);
+        cardDiv.dataset.number = String(number);
+        return cardDiv;
+    }
+
+    function checkWinner() {
+        if(cardsFirst.length == 0) {
+            alert("Player number 1 is the winner!")
+            return;
+        }
+        if(cardsSecond.length == 0) {
+            alert("Player number 2 is the winner!")
+            return;
+        }
+    }
+</script>
+</body>
+</html>

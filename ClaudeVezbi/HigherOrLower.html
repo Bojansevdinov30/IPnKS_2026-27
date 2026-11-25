@@ -1,0 +1,496 @@
+<!--Да се направи веб-страница за играње на играта „Повисоко или пониско“ со шпил од 52 карти. Во горниот дел од веб-страницата се внесуваат податоци за играчот и тоа: име, шифра на играчот, од паѓачка листа се избира број на животи (од 1 до 5) и со checkbox се избира дали играта е Hard mode. Ако при кликнување на копчето Start game не се внесени сите полиња се печати порака за грешка (5 поени). Пред да започне играта треба да се провери дали шифрата има точно 6 знаци, почнува со голема буква и содржи барем една цифра (10 поени). Ако податоците се во ред, формата се сокрива и се креира шпил од 52 карти. Секоја карта е објект со боја (♠, ♥, ♦, ♣) и вредност од 1 до 13 (1 = A, 11 = J, 12 = Q, 13 = K). Шпилот се меша по случаен редослед (15 поени). Од врвот на шпилот се вади прва карта и се прикажува голема на средина на страницата со својата ознака (A, 2–10, J, Q, K) и боја; картите ♥ и ♦ се пишуваат со црвен текст, а ♠ и ♣ со црн (15 поени). Под картата има копчиња Higher и Lower. При клик на едно од нив се вади следната карта од шпилот. Ако играчот погодил, добива 10 поени (во Hard mode 20), а ако не погодил губи еден живот. Ако двете карти имаат иста вредност, во Normal mode не се случува ништо, а во Hard mode се губи живот. Новата карта станува тековна (20 поени). Претходните карти се додаваат во листа „Историја“ како мали картички, најновата прва (5 поени). Животите се прикажуваат како срца (на пример ♥♥♥, се користи метод за повторување на стринг) и бројот им се намалува (5 поени). Играта завршува кога животите ќе станат 0 или шпилот ќе остане без карти. Тогаш копчињата Higher и Lower се оневозможуваат, се печати порака со освоените поени и се појавува копче New game (10 поени). Со клик на New game се враќа формата, а во табелата „Најдобри резултати“ се додава ред со име, шифра и поени; табелата е секогаш подредена по поени опаѓачки (10 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[ Name ][ Code ][ Lives ▼ ] [x] Hard mode  [Start game]
+
+Животи: ♥♥♥        Поени: 30
+          ┌─────┐
+          │ 7 ♦ │   [Higher] [Lower]
+          └─────┘
+Историја: [K♠][3♥][A♣]
+
+Најдобри резултати
+| Име | Шифра | Поени |-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Higher or Lower</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #gameContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .card {
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            height: 150px;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid black;
+            font-size: 30px;
+        }
+
+        .smallCard {
+            width: 60px;
+            height: 80px;
+            font-size: 16px;
+            border: 2px solid black;
+            margin: 5px;
+        }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 100%;
+        }
+
+        #history {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="form">
+
+    <div class="row">
+        <label for="name">Name:</label>
+        <input id="name" type="text">
+    </div>
+
+    <div class="row">
+        <label for="code">Code:</label>
+        <input id="code" type="text">
+    </div>
+
+    <div class="row">
+        <label for="lives">Lives:</label>
+        <select id="lives">
+            <option value="">Choose lives</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+
+    <div class="row">
+        <label for="mode">Hard mode:</label>
+        <input id="mode" type="checkbox">
+    </div>
+
+    <button onclick="startGame()">Start game</button>
+
+</div>
+
+<div id="game" style="display:none">
+
+    <p>Lives: <span id="livesCounter"></span></p>
+    <p>Points: <span id="pointsCounter"></span></p>
+
+    <div id="gameContainer"></div>
+
+    <div id="buttonContainer">
+        <button id="higherButton" onclick="makeGuess('higher')">Higher</button>
+        <button id="lowerButton" onclick="makeGuess('lower')">Lower</button>
+    </div>
+
+    <p id="message"></p>
+
+    <h3>History:</h3>
+    <div id="history"></div>
+
+    <h2 id="gameOverMessage"></h2>
+
+    <button id="newGameButton" onclick="newGame()" style="display:none">
+        New game
+    </button>
+
+</div>
+
+<h2>Best scores</h2>
+
+<table id="table" border="1">
+    <tr>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Points</th>
+    </tr>
+</table>
+
+
+<script>
+
+    let name = "";
+    let code = "";
+
+    let lives = 0;
+    let points = 0;
+
+    let hardMode = false;
+
+    let deck = [];
+    let currentCard;
+
+    let scores = [];
+
+
+    // CHECK IF CODE CONTAINS A DIGIT
+
+    function hasDigit(code) {
+
+        for (let i = 0; i < code.length; i++) {
+
+            if (code.charAt(i) >= "0" && code.charAt(i) <= "9") {
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+
+    // SHUFFLE DECK
+
+    function shuffle() {
+
+        for (let i = deck.length - 1; i > 0; i--) {
+
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = deck[i];
+
+            deck[i] = deck[j];
+
+            deck[j] = temp;
+
+        }
+
+    }
+
+
+    // CREATE A CARD
+
+    function createCard(card, small = false) {
+
+        let cardDiv = document.createElement("div");
+
+        cardDiv.classList.add("card");
+
+        if (small) {
+            cardDiv.classList.add("smallCard");
+        }
+
+        let symbols = ["", "♠", "♥", "♦", "♣"];
+
+        let values = [
+            "", "A", "2", "3", "4", "5", "6",
+            "7", "8", "9", "10", "J", "Q", "K"
+        ];
+
+        let symbol = symbols[card.color];
+        let value = values[card.number];
+
+        cardDiv.innerHTML = `<p>${value} ${symbol}</p>`;
+
+        if (card.color == 2 || card.color == 3) {
+            cardDiv.style.color = "red";
+        } else {
+            cardDiv.style.color = "black";
+        }
+
+        return cardDiv;
+    }
+
+
+    // START GAME
+
+    function startGame() {
+
+        name = document.getElementById("name").value;
+        code = document.getElementById("code").value;
+
+        lives = Number(document.getElementById("lives").value);
+
+        hardMode = document.getElementById("mode").checked;
+
+
+        // Check empty fields
+
+        if (name == "" || code == "" || document.getElementById("lives").value == "") {
+
+            alert("Please enter all fields!");
+            return;
+
+        }
+
+
+        // Check code
+
+        if (
+            code.length != 6 ||
+            !(code.charAt(0) >= "A" && code.charAt(0) <= "Z") ||
+            !hasDigit(code)
+        ) {
+
+            alert("Please enter a valid code!");
+            return;
+
+        }
+
+
+        // Hide form and show game
+
+        document.getElementById("form").style.display = "none";
+        document.getElementById("game").style.display = "block";
+
+
+        // Reset game values
+
+        deck = [];
+        points = 0;
+
+        document.getElementById("history").innerHTML = "";
+        document.getElementById("message").innerHTML = "";
+        document.getElementById("gameOverMessage").innerHTML = "";
+
+
+        // Create 52 cards
+
+        for (let i = 1; i <= 13; i++) {
+
+            for (let j = 1; j <= 4; j++) {
+
+                let card = {
+                    number: i,
+                    color: j
+                };
+
+                deck.push(card);
+
+            }
+
+        }
+
+
+        shuffle();
+
+
+        // Draw first card
+
+        currentCard = deck.pop();
+
+        showCurrentCard();
+
+        updateCounters();
+
+    }
+
+
+    // SHOW CURRENT CARD
+
+    function showCurrentCard() {
+
+        let gameContainer = document.getElementById("gameContainer");
+
+        gameContainer.innerHTML = "";
+
+        let cardDiv = createCard(currentCard);
+
+        gameContainer.appendChild(cardDiv);
+
+    }
+
+
+    // UPDATE LIVES AND POINTS
+
+    function updateCounters() {
+
+        document.getElementById("livesCounter").innerHTML = "♥".repeat(lives);
+
+        document.getElementById("pointsCounter").innerHTML = points;
+
+    }
+
+
+    // HIGHER OR LOWER GUESS
+
+    function makeGuess(guess) {
+
+        if (deck.length == 0) {
+            gameOver();
+            return;
+        }
+
+
+        // Draw next card
+
+        let nextCard = deck.pop();
+
+
+        // Compare cards
+
+        if (nextCard.number == currentCard.number) {
+
+            if (hardMode) {
+                lives--;
+                document.getElementById("message").innerHTML = "Same value! You lost a life.";
+            } else {
+                document.getElementById("message").innerHTML = "Same value! Nothing happens.";
+            }
+
+        }
+
+        else if (
+            (guess == "higher" && nextCard.number > currentCard.number) ||
+            (guess == "lower" && nextCard.number < currentCard.number)
+        ) {
+
+            if (hardMode) {
+                points += 20;
+            } else {
+                points += 10;
+            }
+
+            document.getElementById("message").innerHTML = "Correct guess!";
+
+        }
+
+        else {
+
+            lives--;
+
+            document.getElementById("message").innerHTML = "Wrong guess! You lost a life.";
+
+        }
+
+
+        // Add previous card to history
+
+        let history = document.getElementById("history");
+
+        let oldCard = createCard(currentCard, true);
+
+        history.insertBefore(oldCard, history.firstChild);
+
+
+        // New card becomes current
+
+        currentCard = nextCard;
+
+        showCurrentCard();
+
+        updateCounters();
+
+
+        // Check if game ended
+
+        if (lives <= 0 || deck.length == 0) {
+            gameOver();
+        }
+
+    }
+
+
+    // GAME OVER
+
+    function gameOver() {
+
+        document.getElementById("higherButton").disabled = true;
+        document.getElementById("lowerButton").disabled = true;
+
+        document.getElementById("gameOverMessage").innerHTML =
+            `Game over! You scored ${points} points.`;
+
+        document.getElementById("newGameButton").style.display = "block";
+
+    }
+
+
+    // NEW GAME
+
+    function newGame() {
+
+        // Save result
+
+        let player = {
+            name: name,
+            code: code,
+            points: points
+        };
+
+        scores.push(player);
+
+
+        // Sort scores from highest to lowest
+
+        scores.sort(function(a, b) {
+            return b.points - a.points;
+        });
+
+
+        // Update table
+
+        let table = document.getElementById("table");
+
+        table.innerHTML = `
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Points</th>
+            </tr>
+        `;
+
+        for (let i = 0; i < scores.length; i++) {
+
+            let row = table.insertRow();
+
+            row.insertCell(0).innerHTML = scores[i].name;
+            row.insertCell(1).innerHTML = scores[i].code;
+            row.insertCell(2).innerHTML = scores[i].points;
+
+        }
+
+
+        // Return to form
+
+        document.getElementById("game").style.display = "none";
+        document.getElementById("form").style.display = "block";
+
+
+        // Reset buttons
+
+        document.getElementById("higherButton").disabled = false;
+        document.getElementById("lowerButton").disabled = false;
+
+        document.getElementById("newGameButton").style.display = "none";
+
+    }
+
+</script>
+
+</body>
+</html>

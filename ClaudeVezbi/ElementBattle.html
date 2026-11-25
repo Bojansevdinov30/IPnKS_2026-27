@@ -1,0 +1,636 @@
+<!--Да се направи веб-страница за картичката игра „Битка на елементи“ за два играчи. Во горниот дел се внесуваат име на картичката, код, сила (attack) и од паѓачка листа елемент (fire, water, grass). При клик на Add, ако сите полиња се пополнети, во делот „Колекција“ се додава картичка, а полињата не се ресетираат. Картичката е обоена според елементот: fire – црвена, water – сина, grass – зелена (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање, кодот мора да почнува со мала буква и да завршува со цифра, а силата да биде цел број од 10 до 100 деливо со 5 (10 поени). Ако веќе постои картичка со истиот код, не се додава нова, туку на постоечката се ажурираат силата и елементот (10 поени). Со клик на Start battle (дозволено при парен број картички, најмалку 6) колекцијата се меша по случаен редослед и се дели: првата половина е шпил на Играч 1, втората на Играч 2. Секој шпил е низа, а од него се прикажува само картичката на врвот, под која пишува „Картички: N“ (20 поени). Копчето Fight ги споредува врвните картички. Ефективната сила е attack × 1.5 ако елементот има предност (fire бие grass, grass бие water, water бие fire), attack × 0.5 ако е во неповолна положба, а во останатите случаи attack. Победничката картичка добива +10 на својата сила, а двете картички одат на дното на шпилот на победникот (прво победничката). При изедначување секоја картичка оди на дното на сопствениот шпил. Картичката на победникот добива зелена, а на губитникот црвена дебела рамка, а под шпиловите се испишува резултатот од рундата (на пример „Играч 1 победи: 75 : 60“) (25 поени). Играта завршува кога еден шпил ќе остане празен или по 20 рунди (тогаш победува играчот со повеќе картички). Тогаш копчето Fight се оневозможува и се печати победникот (10 поени). Изгледот на страницата да одговара на скицата во прилог (10 поени).
+[Name][Code][Attack][Element ▼] [Add]  [Start battle]
+Колекција: [картичка][картичка][картичка]...
+Играч 1                    Играч 2
+┌──────────┐   [Fight]   ┌──────────┐
+│ Ogan3    │  Рунда: 4   │ Voda7    │
+│ fire 60  │             │ water 55 │
+└──────────┘             └──────────┘
+Картички: 5              Картички: 7-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Battle of Elements</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            margin: 10px;
+            height: 200px;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        #collection {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #innerDiv {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+        }
+
+        #arena {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            min-height: 300px;
+        }
+
+        #player1, #player2 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 220px;
+        }
+
+        #fightButton {
+            margin: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="form">
+
+    <div class="row">
+        <label for="name">Name:</label>
+        <input type="text" id="name">
+    </div>
+
+    <div class="row">
+        <label for="code">Code:</label>
+        <input type="text" id="code">
+    </div>
+
+    <div class="row">
+        <label for="attack">Attack:</label>
+        <input type="text" id="attack">
+    </div>
+
+    <div class="row">
+        <label for="element">Element:</label>
+        <select id="element">
+            <option value="">Choose element</option>
+            <option value="fire">Fire</option>
+            <option value="water">Water</option>
+            <option value="grass">Grass</option>
+        </select>
+    </div>
+
+    <button onclick="addCard()">Add</button>
+    <button onclick="startBattle()">Start battle</button>
+
+</div>
+
+<h2>Collection:</h2>
+<div id="collection"></div>
+
+<div id="arena">
+
+    <div id="innerDiv">
+
+        <div id="player1">
+            <h3>Player 1</h3>
+        </div>
+
+        <div id="player2">
+            <h3>Player 2</h3>
+        </div>
+
+    </div>
+
+    <p id="result"></p>
+
+    <button id="fightButton" onclick="fight()" disabled>
+        Fight
+    </button>
+
+    <h1 id="winner"></h1>
+
+</div>
+
+<script>
+
+    let cards = [];
+    let player1 = [];
+    let player2 = [];
+
+    let roundCounter = 0;
+    let gameStarted = false;
+
+
+    // ADD CARD
+
+    function addCard() {
+
+        if (gameStarted) {
+            return;
+        }
+
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let attack = document.getElementById("attack").value;
+        let element = document.getElementById("element").value;
+
+
+        // Check empty fields
+
+        if (name == "" || code == "" || attack == "" || element == "") {
+            alert("Enter all fields!");
+            return;
+        }
+
+
+        // Check code
+
+        if (!(code.charAt(0) >= "a" && code.charAt(0) <= "z") ||
+            !(code.charAt(code.length - 1) >= "0" && code.charAt(code.length - 1) <= "9")) {
+
+            alert("Enter valid code!");
+            return;
+        }
+
+
+        // Check attack
+
+        attack = Number(attack);
+
+        if (!Number.isInteger(attack) || attack < 10 ||
+            attack > 100 || attack % 5 != 0) {
+
+            alert("Enter valid attack!");
+            return;
+        }
+
+
+        let card = {
+            name: name,
+            code: code,
+            attack: attack,
+            element: element
+        };
+
+
+        // Check if card with this code already exists
+
+        let found = false;
+
+        for (let i = 0; i < cards.length; i++) {
+
+            if (cards[i].dataset.code == code) {
+
+                let newCard = createCard(card);
+
+                cards[i] = newCard;
+
+                found = true;
+                break;
+            }
+        }
+
+
+        // If it doesn't exist, add a new card
+
+        if (!found) {
+
+            let cardDiv = createCard(card);
+            cards.push(cardDiv);
+
+        }
+
+        updateCollection();
+
+    }
+
+
+    // CREATE CARD
+
+    function createCard(card) {
+
+        let cardDiv = document.createElement("div");
+
+        cardDiv.classList.add("card");
+
+
+        // Color according to element
+
+        if (card.element == "fire") {
+            cardDiv.style.backgroundColor = "red";
+        }
+        else if (card.element == "water") {
+            cardDiv.style.backgroundColor = "blue";
+        }
+        else {
+            cardDiv.style.backgroundColor = "green";
+        }
+
+
+        cardDiv.innerHTML = `
+            <p>Name: ${card.name}</p>
+            <p>Code: ${card.code}</p>
+            <p class="attack">Attack: ${card.attack}</p>
+            <p>Element: ${card.element}</p>
+        `;
+
+
+        cardDiv.id = card.code;
+
+        cardDiv.dataset.name = card.name;
+        cardDiv.dataset.code = card.code;
+        cardDiv.dataset.attack = card.attack;
+        cardDiv.dataset.element = card.element;
+
+        return cardDiv;
+
+    }
+
+
+    // UPDATE COLLECTION
+
+    function updateCollection() {
+
+        let container = document.getElementById("collection");
+
+        container.innerHTML = "";
+
+        for (let i = 0; i < cards.length; i++) {
+
+            container.appendChild(cards[i]);
+
+        }
+
+    }
+
+
+    // SHUFFLE CARDS
+
+    function shuffle() {
+
+        for (let i = cards.length - 1; i > 0; i--) {
+
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = cards[i];
+
+            cards[i] = cards[j];
+
+            cards[j] = temp;
+
+        }
+
+    }
+
+
+    // START BATTLE
+
+    function startBattle() {
+
+        if (cards.length < 6 || cards.length % 2 != 0) {
+
+            alert("You need at least 6 cards and an even number of cards!");
+            return;
+
+        }
+
+        gameStarted = true;
+
+
+        // Hide collection
+
+        document.getElementById("collection").style.display = "none";
+
+
+        // Disable adding cards
+
+        document.querySelector("#form button").disabled = true;
+        document.querySelectorAll("#form button")[1].disabled = true;
+
+
+        // Shuffle and divide cards
+
+        shuffle();
+
+        player1 = cards.slice(0, cards.length / 2);
+
+        player2 = cards.slice(cards.length / 2);
+
+
+        document.getElementById("fightButton").disabled = false;
+
+        battle();
+
+    }
+
+
+    // DISPLAY THE TOP CARD OF EACH PLAYER
+
+    function battle() {
+
+        let p1 = document.getElementById("player1");
+
+        let p2 = document.getElementById("player2");
+
+
+        p1.innerHTML = "<h3>Player 1</h3>";
+
+        p2.innerHTML = "<h3>Player 2</h3>";
+
+
+        // Player 1 top card
+
+        if (player1.length > 0) {
+
+            p1.appendChild(player1[0]);
+
+        }
+        else {
+
+            p1.innerHTML += "<p>No cards</p>";
+
+        }
+
+
+        let count1 = document.createElement("p");
+
+        count1.textContent = "Cards: " + player1.length;
+
+        p1.appendChild(count1);
+
+
+        // Player 2 top card
+
+        if (player2.length > 0) {
+
+            p2.appendChild(player2[0]);
+
+        }
+        else {
+
+            p2.innerHTML += "<p>No cards</p>";
+
+        }
+
+
+        let count2 = document.createElement("p");
+
+        count2.textContent = "Cards: " + player2.length;
+
+        p2.appendChild(count2);
+
+    }
+
+
+    // CALCULATE EFFECTIVE ATTACK
+
+    function calculateAttack(card, opponent) {
+
+        let attack = Number(card.dataset.attack);
+
+        let element1 = card.dataset.element;
+
+        let element2 = opponent.dataset.element;
+
+
+        // Advantage: x1.5
+
+        if (
+            (element1 == "fire" && element2 == "grass") ||
+            (element1 == "grass" && element2 == "water") ||
+            (element1 == "water" && element2 == "fire")
+        ) {
+
+            attack *= 1.5;
+
+        }
+
+
+        // Disadvantage: x0.5
+
+        else if (
+            (element1 == "grass" && element2 == "fire") ||
+            (element1 == "water" && element2 == "grass") ||
+            (element1 == "fire" && element2 == "water")
+        ) {
+
+            attack *= 0.5;
+
+        }
+
+
+        return attack;
+
+    }
+
+
+    // UPDATE THE DISPLAYED ATTACK
+
+    function updateCardAttack(card) {
+
+        card.querySelector(".attack").textContent =
+            "Attack: " + card.dataset.attack;
+
+    }
+
+
+    // FIGHT
+
+    function fight() {
+
+        if (player1.length == 0 || player2.length == 0) {
+            return;
+        }
+
+
+        // Get the top cards
+
+        let card1 = player1.shift();
+
+        let card2 = player2.shift();
+
+
+        // Calculate effective attacks
+
+        let attack1 = calculateAttack(card1, card2);
+
+        let attack2 = calculateAttack(card2, card1);
+
+
+        let result = document.getElementById("result");
+
+
+        // Player 1 wins
+
+        if (attack1 > attack2) {
+
+            card1.style.border = "5px solid green";
+
+            card2.style.border = "5px solid red";
+
+
+            // Winner gets +10 attack
+
+            card1.dataset.attack = Number(card1.dataset.attack) + 10;
+
+            updateCardAttack(card1);
+
+
+            result.textContent =
+                `Player 1 wins: ${attack1} : ${attack2}`;
+
+
+            // Both cards go to Player 1's deck
+
+            player1.push(card1);
+
+            player1.push(card2);
+
+        }
+
+
+        // Player 2 wins
+
+        else if (attack2 > attack1) {
+
+            card2.style.border = "5px solid green";
+
+            card1.style.border = "5px solid red";
+
+
+            // Winner gets +10 attack
+
+            card2.dataset.attack = Number(card2.dataset.attack) + 10;
+
+            updateCardAttack(card2);
+
+
+            result.textContent =
+                `Player 2 wins: ${attack2} : ${attack1}`;
+
+
+            // Both cards go to Player 2's deck
+
+            player2.push(card2);
+
+            player2.push(card1);
+
+        }
+
+
+        // Draw
+
+        else {
+
+            card1.style.border = "none";
+
+            card2.style.border = "none";
+
+
+            result.textContent =
+                `Draw: ${attack1} : ${attack2}`;
+
+
+            // Each card returns to its own deck
+
+            player1.push(card1);
+
+            player2.push(card2);
+
+        }
+
+
+        roundCounter++;
+
+
+        // Display the next cards
+
+        battle();
+
+
+        // CHECK IF GAME HAS ENDED
+
+        if (player1.length == 0 || player2.length == 0) {
+
+            if (player1.length > player2.length) {
+
+                endGame("Player 1 wins!");
+
+            }
+            else if (player2.length > player1.length) {
+
+                endGame("Player 2 wins!");
+
+            }
+            else {
+
+                endGame("Draw!");
+
+            }
+
+        }
+
+
+        // Maximum 20 rounds
+
+        else if (roundCounter >= 20) {
+
+            if (player1.length > player2.length) {
+
+                endGame("Player 1 wins with " + player1.length + " cards!");
+
+            }
+            else if (player2.length > player1.length) {
+
+                endGame("Player 2 wins with " + player2.length + " cards!");
+
+            }
+            else {
+
+                endGame("Draw! Both players have " + player1.length + " cards.");
+
+            }
+
+        }
+
+    }
+
+
+    // END GAME
+
+    function endGame(message) {
+
+        document.getElementById("winner").textContent = message;
+
+        document.getElementById("fightButton").disabled = true;
+
+    }
+
+</script>
+
+</body>
+</html>

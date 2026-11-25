@@ -1,0 +1,363 @@
+<!--Да се направи веб-страница за споредба на покер раки. Во горниот дел од веб-страницата се внесуваат податоци за играчот и тоа: име, влог и рака, која се состои од 5 карти одделени со запирка. Секоја карта се запишува како вредност (2–10, J, Q, K, A) и боја (S, H, D, C), на пример 10H,KS,2D,7C,AH. При клик на Add, ако сите полиња се пополнети, се додава картичка за играчот, а полињата се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали раката има точно 5 карти, дали секоја карта е валидна (вредноста е од дозволеното множество, а последниот знак е S, H, D или C), дали во раката нема повторена карта и дали некој друг играч веќе ја користи истата карта (една карта може да биде само во една рака, да се користи Set); влогот да биде цел број поголем од 0 (20 поени). Картичката на играчот ги прикажува името, влогот и раката како една позади друга мали карти (div елементи), во кои пишува вредноста и симбол на бојата (♠ ♥ ♦ ♣), при што ♥ и ♦ се црвени (10 поени). Копчето Evaluate се активира кога ќе постојат најмалку два играча (5 поени). Со клик на Evaluate за секоја рака се пребројуваат картите според вредност и се одредува комбинацијата со користење на објект како бројач: four of a kind (6), full house (5), flush – сите 5 карти иста боја (4), three of a kind (3), two pairs (2), one pair (1), high card (0) (20 поени). Картичката по оценувањето го испишува името на комбинацијата и се обојува: high card – сиво, one pair и two pairs – жолто, three of a kind и flush – сино, full house и four of a kind – зелено (10 поени). Победник е играчот со највисок бројач на комбинација, а при изедначување оној со поголем збир на вредностите на картите (2–10 со својата вредност, J = 11, Q = 12, K = 13, A = 14). Победничката картичка добива златна рамка, а преку бројачот „Пот“ се прикажува збирот на влоговите на сите играчи (10 поени). Пред оценувањето во секоја картичка постои копче Remove, кое ја брише картичката и ги ослободува нејзините карти за ново користење; по оценувањето копчето се оневозможува (5 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+Пример: 10H,KS,2D,7C,AH → high card (збир 10+13+2+7+14 = 46); 5H,5D,9S,9C,KD → two pairs; QH,QD,QS,3C,3H → full house.
+[ Name ][ Bet ][ Hand: 10H,KS,2D,7C,AH ] [Add] [Evaluate]   Пот: 350
+┌ Ана ── Bet 100 ───────────────────┐
+│ [10♥][K♠][2♦][7♣][A♥]   full house   [Remove] │
+└───────────────────────────────────────┘-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Poker Hands</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+        }
+
+        input {
+            padding: 8px;
+            margin-right: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+        }
+
+        #players {
+            margin-top: 25px;
+        }
+
+        .player {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card {
+            border: 1px solid black;
+            padding: 10px;
+            background: white;
+            font-size: 18px;
+        }
+
+        .red {
+            color: red;
+        }
+
+        .gray {
+            background: gray;
+        }
+
+        .yellow {
+            background: yellow;
+        }
+
+        .blue {
+            background: lightblue;
+        }
+
+        .green {
+            background: lightgreen;
+        }
+
+        .winner {
+            border: 4px solid gold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Poker Hands Comparison</h2>
+
+<input type="text" id="name" placeholder="Name">
+<input type="number" id="bet" placeholder="Bet">
+<input type="text" id="hand" placeholder="Hand: 10H,KS,2D,7C,AH">
+
+<button onclick="addPlayer()">Add</button>
+<button onclick="evaluate()" id="evaluate" disabled>Evaluate</button>
+
+<span>Pot: <span id="pot">0</span></span>
+
+<p id="message"></p>
+
+<div id="players"></div>
+
+<script>
+    function addPlayer() {
+        let name = document.getElementById("name").value.trim();
+        let bet = document.getElementById("bet").value;
+        let handInput = document.getElementById("hand").value.trim();
+
+        let message = document.getElementById("message");
+
+        // Check if all fields are filled
+        if (name === "" || bet === "" || handInput === "") {
+            message.innerHTML = "Please fill in all fields!";
+            return;
+        }
+
+        // Check bet
+        if (!Number.isInteger(Number(bet)) || Number(bet) <= 0) {
+            message.innerHTML = "Bet must be a positive integer!";
+            return;
+        }
+
+        // Split hand into cards
+        let hand = handInput.split(",").map(card => card.trim().toUpperCase());
+
+        // Check exactly 5 cards
+        if (hand.length !== 5) {
+            message.innerHTML = "Hand must contain exactly 5 cards!";
+            return;
+        }
+
+        let values = ["2", "3", "4", "5", "6", "7", "8", "9", "10",
+            "J", "Q", "K", "A"];
+
+        let suits = ["S", "H", "D", "C"];
+
+        let tempSet = new Set();
+
+        for (let card of hand) {
+
+            let value = card.slice(0, -1);
+            let suit = card.slice(-1);
+
+            // Check valid card
+            if (!values.includes(value) || !suits.includes(suit)) {
+                message.innerHTML = "Invalid card: " + card;
+                return;
+            }
+
+            // Check duplicates inside the same hand
+            if (tempSet.has(card)) {
+                message.innerHTML = "Duplicate card in hand!";
+                return;
+            }
+
+            tempSet.add(card);
+
+            // Check cards used by other players
+            if (usedCards.has(card)) {
+                message.innerHTML = "This card is already being used: " + card;
+                return;
+            }
+        }
+
+        // Everything is valid. Create player.
+        let player = {
+            name: name,
+            bet: Number(bet),
+            hand: hand
+        };
+
+        players.push(player);
+
+        // Add cards to global Set
+        for (let card of hand) {
+            usedCards.add(card);
+        }
+
+        // Clear inputs
+        document.getElementById("name").value = "";
+        document.getElementById("bet").value = "";
+        document.getElementById("hand").value = "";
+
+        message.innerHTML = "";
+
+        renderPlayers();
+
+        // Enable Evaluate when there are at least 2 players
+        document.getElementById("evaluate").disabled = players.length < 2;
+    }
+
+    function renderPlayers() {
+        let container = document.getElementById("players");
+
+        container.innerHTML = "";
+
+        for (let i = 0; i < players.length; i++) {
+
+            let p = players[i];
+
+            let div = document.createElement("div");
+            div.className = "player";
+
+            let html = `
+            <strong>${p.name}</strong>
+            Bet: ${p.bet}
+            <div class="cards">
+        `;
+
+            for (let card of p.hand) {
+
+                let value = card.slice(0, -1);
+                let suit = card.slice(-1);
+
+                let symbols = {
+                    S: "♠",
+                    H: "♥",
+                    D: "♦",
+                    C: "♣"
+                };
+
+                let color = (suit === "H" || suit === "D") ? "red" : "";
+
+                html += `
+                <div class="card ${color}">
+                    ${value}${symbols[suit]}
+                </div>
+            `;
+            }
+
+            html += "</div>";
+
+            // Show combination if evaluated
+            if (p.combination !== undefined) {
+                html += `<strong>${p.combinationName}</strong>`;
+            }
+
+            // Remove button
+            html += `
+            <button onclick="removePlayer(${i})"
+                ${p.evaluated ? "disabled" : ""}>
+                Remove
+            </button>
+        `;
+
+            div.innerHTML = html;
+
+            // Combination background
+            if (p.evaluated) {
+                div.classList.add(p.color);
+            }
+
+            // Winner border
+            if (p.winner) {
+                div.classList.add("winner");
+            }
+
+            container.appendChild(div);
+        }
+    }
+
+    function removePlayer(index) {
+
+        let player = players[index];
+
+        // Free their cards
+        for (let card of player.hand) {
+            usedCards.delete(card);
+        }
+
+        // Remove player
+        players.splice(index, 1);
+
+        renderPlayers();
+
+        document.getElementById("evaluate").disabled = players.length < 2;
+
+        updatePot();
+    }
+
+    function getCombination(hand) {
+
+        let counter = {};
+
+        let suits = [];
+
+        let sum = 0;
+
+        let values = {
+            J: 11,
+            Q: 12,
+            K: 13,
+            A: 14
+        };
+
+        for (let card of hand) {
+
+            let value = card.slice(0, -1);
+            let suit = card.slice(-1);
+
+            // Count card values
+            if (counter[value] === undefined) {
+                counter[value] = 0;
+            }
+
+            counter[value]++;
+
+            // Store suits
+            suits.push(suit);
+
+            // Calculate total value
+            if (isNaN(Number(value))) {
+                sum += values[value];
+            } else {
+                sum += Number(value);
+            }
+        }
+
+        // Get frequencies
+        let counts = Object.values(counter);
+
+        // Check flush
+        let flush = suits.every(suit => suit === suits[0]);
+
+        let combination;
+        let name;
+        let color;
+
+        if (counts.includes(4)) {
+            combination = 6;
+            name = "Four of a kind";
+            color = "green";
+        } else if (counts.includes(3) && counts.includes(2)) {
+            combination = 5;
+            name = "Full house";
+            color = "green";
+        } else if (flush) {
+            combination = 4;
+            name = "Flush";
+            color = "blue";
+        } else if (counts.includes(3)) {
+            combination = 3;
+            name = "Three of a kind";
+            color = "blue";
+        } else if (counts.filter(x => x === 2).length === 2) {
+            combination = 2;
+            name = "Two pairs";
+            color = "yellow";
+        } else if (counts.includes(2)) {
+            combination = 1;
+            name = "One pair";
+            color = "yellow";
+        } else {
+            combination = 0;
+            name = "High card";
+            color = "gray";
+        }
+
+        return {
+            combination: combination,
+            name: name,
+            color: color,
+            sum: sum
+        };
+    }
+</script>
+</body>
+</html>

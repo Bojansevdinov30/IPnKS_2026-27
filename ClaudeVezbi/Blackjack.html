@@ -1,0 +1,288 @@
+<!--Да се направи веб-страница за играње на картичката игра „Дваесет и еден“ за повеќе играчи. Во горниот дел од веб-страницата се внесуваат податоци за играчот и тоа: име, код на играчот, влог (во денари) и преку radio копчиња се избира тежина на играта (easy, hard). При кликнување на копчето Add, ако сите полиња се пополнети, се додава картичка за играчот, а полињата се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред да се додаде картичка, потребно е да се провери дали кодот е во формат две големи букви - цртичка - три цифри (на пример AB-123) и дали е слободен, дали влогот е број поголем од 0 што е делив со 10 и дали веќе постои играч со исто име (без разлика на големи и мали букви) (15 поени). Со клик на копчето Deal, доколку има најмалку 2 и најмногу 4 играчи (во спротивно се печати порака), секој играч добива по две случајни карти со вредност од 1 до 11, чија сума се прикажува на неговата картичка, а полињата од формата се оневозможуваат (10 поени). Секоја картичка има копчиња Hit и Stand. На Hit играчот добива нова случајна карта (1 до 11), картата се зачувува во низа од карти на играчот и сумата се ажурира. Границата е 21 за тежина easy, а 18 за тежина hard. Ако сумата ја надмине границата, картичката станува црвена, а двете копчиња се оневозможуваат (20 поени). На Stand картичката станува сина, а двете копчиња се оневозможуваат (5 поени). Кога сите играчи ќе завршат (Stand или надминување на границата), се одредува победник: играчот со најголема сума што не ја надминала границата, а при иста сума победува оној со поголем влог. Картичката на победникот станува зелена и на неа се испишува добивка еднаква на збирот од влоговите на сите играчи. Ако сите ја надминале границата се печати „Куќата победи“ (20 поени). Над картичките стои бројач кој го покажува бројот на играчи што сè уште играат (5 поени). Изгледот на страницата да одговара на скицата во прилог (10 поени).
+Blackjack
+[ Name ] [ Code ] [ Bet ] (•) easy ( ) hard  [Add] [Deal]
+Играчи во игра: 3
+┌ AB-123 ──────┐ ┌ XY-777 ──────┐
+│ Ана  Bet: 50 │ │ Борис Bet: 80│
+│ Карти: 7, 9  │ │ Карти: 11, 4 │
+│ Сума: 16     │ │ Сума: 15     │
+│ [Hit][Stand] │ │ [Hit][Stand] │
+└──────────────┘ └──────────────┘-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Blackjack</title>
+
+    <style>
+        .card {
+            display: inline-block;
+            border: 1px solid black;
+            padding: 15px;
+            margin: 10px;
+            width: 180px;
+        }
+    </style>
+
+    <script>
+        let players = [];
+        let codes = new Set();
+        let names = new Set();
+
+        let playing = false;
+
+        function addPlayer() {
+            let name = document.getElementById("name").value;
+            let code = document.getElementById("code").value;
+            let bet = document.getElementById("bet").value;
+            let difficulty = document.querySelector('input[name="difficulty"]:checked');
+
+            let message = document.getElementById("message");
+
+            if (name === "" || code === "" || bet === "" || difficulty === null) {
+                message.innerHTML = "Fill in all fields!";
+                return;
+            }
+
+            if (!/^[A-Z]{2}-[0-9]{3}$/.test(code)) {
+                message.innerHTML = "Invalid code!";
+                return;
+            }
+
+            if (codes.has(code)) {
+                message.innerHTML = "Code already exists!";
+                return;
+            }
+
+            if (Number(bet) <= 0 || Number(bet) % 10 !== 0 || isNaN(Number(bet))) {
+                message.innerHTML = "Bet must be positive and divisible by 10!";
+                return;
+            }
+
+            if (names.has(name.toLowerCase())) {
+                message.innerHTML = "Player name already exists!";
+                return;
+            }
+
+            let player = {
+                name: name,
+                code: code,
+                bet: Number(bet),
+                difficulty: difficulty.value,
+                cards: [],
+                sum: 0,
+                finished: false
+            };
+
+            players.push(player);
+
+            codes.add(code);
+            names.add(name.toLowerCase());
+
+            document.getElementById("name").value = "";
+            document.getElementById("code").value = "";
+            document.getElementById("bet").value = "";
+
+            message.innerHTML = "";
+
+            showPlayers();
+        }
+
+        function deal() {
+            let message = document.getElementById("message");
+
+            if (players.length < 2 || players.length > 4) {
+                message.innerHTML = "There must be between 2 and 4 players!";
+                return;
+            }
+
+            playing = true;
+
+            for (let player of players) {
+                player.cards.push(randomCard());
+                player.cards.push(randomCard());
+
+                player.sum = player.cards[0] + player.cards[1];
+            }
+
+            document.getElementById("name").disabled = true;
+            document.getElementById("code").disabled = true;
+            document.getElementById("bet").disabled = true;
+
+            let radios = document.querySelectorAll('input[name="difficulty"]');
+
+            for (let radio of radios) {
+                radio.disabled = true;
+            }
+
+            document.getElementById("add").disabled = true;
+            document.getElementById("deal").disabled = true;
+
+            showPlayers();
+        }
+
+        function randomCard() {
+            return Math.floor(Math.random() * 11) + 1;
+        }
+
+        function hit(index) {
+            let player = players[index];
+
+            if (player.finished || !playing) {
+                return;
+            }
+
+            player.cards.push(randomCard());
+
+            player.sum = 0;
+
+            for (let card of player.cards) {
+                player.sum += card;
+            }
+
+            let limit = player.difficulty === "easy" ? 21 : 18;
+
+            if (player.sum > limit) {
+                player.finished = true;
+            }
+
+            showPlayers();
+            checkWinner();
+        }
+
+        function stand(index) {
+            players[index].finished = true;
+
+            showPlayers();
+            checkWinner();
+        }
+
+        function checkWinner() {
+            let active = 0;
+
+            for (let player of players) {
+                if (!player.finished) {
+                    active++;
+                }
+            }
+
+            document.getElementById("remaining").innerHTML = active;
+
+            if (active !== 0) {
+                return;
+            }
+
+            playing = false;
+
+            let winner = null;
+            let totalBet = 0;
+
+            for (let player of players) {
+                totalBet += player.bet;
+
+                let limit = player.difficulty === "easy" ? 21 : 18;
+
+                if (player.sum <= limit) {
+                    if (winner === null ||
+                        player.sum > winner.sum ||
+                        (player.sum === winner.sum && player.bet > winner.bet)) {
+
+                        winner = player;
+                    }
+                }
+            }
+
+            if (winner === null) {
+                document.getElementById("message").innerHTML = "Куќата победи";
+            } else {
+                winner.won = totalBet;
+
+                document.getElementById("message").innerHTML =
+                    "Winner: " + winner.name + " | Winnings: " + totalBet;
+            }
+
+            showPlayers();
+        }
+
+        function showPlayers() {
+            let html = "";
+
+            let active = 0;
+
+            for (let i = 0; i < players.length; i++) {
+                let p = players[i];
+
+                let limit = p.difficulty === "easy" ? 21 : 18;
+
+                let color = "";
+
+                if (p.finished) {
+                    if (p.sum > limit) {
+                        color = "red";
+                    } else if (p.won !== undefined) {
+                        color = "green";
+                    } else {
+                        color = "lightblue";
+                    }
+                } else {
+                    active++;
+                }
+
+                html += "<div class='card' style='background-color:" + color + "'>";
+
+                html += "<h3>" + p.code + "</h3>";
+                html += p.name + "<br>";
+                html += "Bet: " + p.bet + "<br>";
+                html += "Difficulty: " + p.difficulty + "<br>";
+                html += "Cards: " + p.cards.join(", ") + "<br>";
+                html += "Sum: " + p.sum + "<br>";
+
+                if (p.won !== undefined) {
+                    html += "Winnings: " + p.won + "<br>";
+                }
+
+                if (playing && !p.finished) {
+                    html += "<button onclick='hit(" + i + ")'>Hit</button>";
+                    html += "<button onclick='stand(" + i + ")'>Stand</button>";
+                }
+
+                html += "</div>";
+            }
+
+            document.getElementById("players").innerHTML = html;
+            document.getElementById("remaining").innerHTML = active;
+        }
+
+    </script>
+</head>
+
+<body>
+
+<h1>Blackjack</h1>
+
+<div>
+    Name:
+    <input type="text" id="name">
+
+    Code:
+    <input type="text" id="code">
+
+    Bet:
+    <input type="number" id="bet">
+
+    <input type="radio" name="difficulty" value="easy" checked> Easy
+    <input type="radio" name="difficulty" value="hard"> Hard
+
+    <button id="add" onclick="addPlayer()">Add</button>
+    <button id="deal" onclick="deal()">Deal</button>
+</div>
+
+<p id="message"></p>
+
+<h3>Players still playing: <span id="remaining">0</span></h3>
+
+<div id="players"></div>
+
+</body>
+</html>

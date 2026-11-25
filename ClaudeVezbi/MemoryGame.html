@@ -1,0 +1,245 @@
+<!--Да се направи веб-страница за играње на играта Меморија со картички. Во горниот дел од веб-страницата се внесуваат податоци за картичката и тоа: име, код, поени и од паѓачка листа се избира боја (red, green, blue, orange). При кликнување на копчето Add, ако сите полиња се пополнети, во делот „Картички“ се додава нова картичка, а полињата не се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред да се додаде картичката, треба да се провери дали кодот се состои од точно 3 големи букви (без цифри и знаци), дали некоја друга картичка веќе го користи тој код (да се користи Set) и дали поените се цел број од 1 до 50 (15 поени). Копчето Start game е оневозможено сѐ додека не се додадат барем 4 картички (5 поени). Со клик на Start game формата се сокрива, секоја картичка се дуплира (се добива пар од две исти картички), сите картички се мешаат по случаен редослед и се прикажуваат превртени, т.е. со сива позадина и знак „?“ наместо податоци (15 поени). Со клик на превртена картичка таа се отвора и ги прикажува бојата, името и кодот. Не смеат да бидат отворени повеќе од две картички истовремено (10 поени). Кога се отворени две картички: ако имаат ист код, и двете се обојуваат зелено, остануваат отворени до крајот и на играчот му се додаваат поени еднакви на поените од картичката; ако имаат различен код, остануваат отворени со црвена позадина, сите останати картички не реагираат на клик и се активира копчето Continue. Со клик на Continue двете картички се превртуваат назад, а играчот губи 5 поени (поените не смеат да паднат под 0) (20 поени). Над картичките се прикажуваат бројач на поени и бројач на потези, при што секои две отворени картички се еден потег (5 поени). Кога ќе се погодат сите парови, се печати порака со вкупните поени и бројот на потези, а картичките повеќе не реагираат на клик (5 поени). Изгледот на страницата да одговара на скицата во прилог (10 поени).-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Game</title>
+
+    <style>
+        .card {
+            width: 120px;
+            height: 100px;
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: gray;
+            cursor: pointer;
+            padding-top: 20px;
+            box-sizing: border-box;
+        }
+
+        #cards {
+            width: 600px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+        let cards = [];
+        let codes = new Set();
+
+        let first = null;
+        let second = null;
+
+        let points = 0;
+        let moves = 0;
+        let matched = 0;
+
+        let gameStarted = false;
+
+        function addCard() {
+            let name = document.getElementById("name").value;
+            let code = document.getElementById("code").value;
+            let pts = document.getElementById("points").value;
+            let color = document.getElementById("color").value;
+
+            let message = document.getElementById("message");
+
+            if (name === "" || code === "" || pts === "" || color === "") {
+                message.innerHTML = "Please fill in all fields!";
+                return;
+            }
+
+            if (!/^[A-Z]{3}$/.test(code)) {
+                message.innerHTML = "Code must contain exactly 3 uppercase letters!";
+                return;
+            }
+
+            if (codes.has(code)) {
+                message.innerHTML = "This code already exists!";
+                return;
+            }
+
+            if (!Number.isInteger(Number(pts)) || Number(pts) < 1 || Number(pts) > 50) {
+                message.innerHTML = "Points must be an integer from 1 to 50!";
+                return;
+            }
+
+            let card = {
+                name: name,
+                code: code,
+                points: Number(pts),
+                color: color
+            };
+
+            cards.push(card);
+            codes.add(code);
+
+            document.getElementById("cardList").innerHTML +=
+                "<div style='background-color:" + color + "; padding:10px; margin:5px; display:inline-block'>" +
+                name + " - " + code + " - " + pts +
+                "</div>";
+
+            message.innerHTML = "";
+
+            if (cards.length >= 4) {
+                document.getElementById("start").disabled = false;
+            }
+        }
+
+        function startGame() {
+            document.getElementById("form").classList.add("hidden");
+            document.getElementById("start").classList.add("hidden");
+
+            let gameCards = [...cards, ...cards];
+
+            // Shuffle cards
+            for (let i = gameCards.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+
+                let temp = gameCards[i];
+                gameCards[i] = gameCards[j];
+                gameCards[j] = temp;
+            }
+
+            let html = "";
+
+            for (let i = 0; i < gameCards.length; i++) {
+                html += "<div class='card' id='c" + i + "' onclick='openCard(" + i + ")'>?</div>";
+            }
+
+            document.getElementById("cardList").innerHTML = html;
+
+            // Store shuffled cards
+            cards = gameCards;
+            gameStarted = true;
+        }
+
+        function openCard(index) {
+            if (!gameStarted || first !== null && second !== null) {
+                return;
+            }
+
+            let element = document.getElementById("c" + index);
+
+            // Do not open an already opened or matched card
+            if (element.innerHTML !== "?") {
+                return;
+            }
+
+            element.style.backgroundColor = cards[index].color;
+
+            element.innerHTML =
+                cards[index].name + "<br>" +
+                cards[index].code;
+
+            if (first === null) {
+                first = index;
+                return;
+            }
+
+            second = index;
+            moves++;
+
+            document.getElementById("moves").innerHTML = moves;
+
+            if (cards[first].code === cards[second].code) {
+
+                document.getElementById("c" + first).style.backgroundColor = "green";
+                document.getElementById("c" + second).style.backgroundColor = "green";
+
+                points += cards[first].points;
+                matched += 2;
+
+                document.getElementById("pointsDisplay").innerHTML = points;
+
+                first = null;
+                second = null;
+
+                if (matched === cards.length) {
+                    gameStarted = false;
+
+                    document.getElementById("message").innerHTML =
+                        "Congratulations! Final points: " + points +
+                        ", Moves: " + moves;
+                }
+
+            } else {
+
+                document.getElementById("c" + first).style.backgroundColor = "red";
+                document.getElementById("c" + second).style.backgroundColor = "red";
+
+                document.getElementById("continue").classList.remove("hidden");
+            }
+        }
+
+        function continueGame() {
+            document.getElementById("c" + first).innerHTML = "?";
+            document.getElementById("c" + second).innerHTML = "?";
+
+            document.getElementById("c" + first).style.backgroundColor = "gray";
+            document.getElementById("c" + second).style.backgroundColor = "gray";
+
+            points = Math.max(0, points - 5);
+
+            document.getElementById("pointsDisplay").innerHTML = points;
+
+            first = null;
+            second = null;
+
+            document.getElementById("continue").classList.add("hidden");
+        }
+    </script>
+</head>
+
+<body>
+
+<h1>Memory Game</h1>
+
+<div id="form">
+    Name:
+    <input type="text" id="name">
+
+    Code:
+    <input type="text" id="code">
+
+    Points:
+    <input type="number" id="points">
+
+    Color:
+    <select id="color">
+        <option value="">Select color</option>
+        <option value="red">Red</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="orange">Orange</option>
+    </select>
+
+    <button onclick="addCard()">Add</button>
+</div>
+
+<p id="message"></p>
+
+<button id="start" onclick="startGame()" disabled>
+    Start game
+</button>
+
+<div>
+    <h3>Points: <span id="pointsDisplay">0</span></h3>
+    <h3>Moves: <span id="moves">0</span></h3>
+</div>
+
+<div id="cardList"></div>
+
+<button id="continue" class="hidden" onclick="continueGame()">
+    Continue
+</button>
+
+</body>
+</html>
