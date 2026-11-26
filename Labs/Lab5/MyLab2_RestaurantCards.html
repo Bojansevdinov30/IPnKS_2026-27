@@ -1,0 +1,251 @@
+<!--Да се направи веб-страница за инспекција на ресторани. Во горниот дел од веб-страницата се внесуваат податоци за ресторанот, и тоа име на ресторанот, име и презиме на сопственикот, град и од паѓачка листа се избира големината на ресторанот (small, large). Под формата се наоѓаат сите досега пријавени ресторани, прикажани во картички.
+
+При кликнување на копчето Add restaurant, ако сите полиња се пополнети, се додава картичка со новопријавениот ресторан, а полињата не се ресетираат (15 поени). Ако не се внесени сите полиња, се печати порака за грешка (5 поени).
+
+Пред да се додаде нов ресторан, треба да се провери дали името на ресторанот е слободно (никој не го искористил досега) и дали е во правилен формат, т.е. не смее да содржи броеви и знаците # и @ (15 поени). Доколку наведените услови се исполнети, ресторанот се пријавува и се додава, во спротивно се печати порака за грешка и ресторанот не се додава.
+
+Откако ќе се пријават барем 3 ресторани, инспекцијата може да започне. Со клик на копчето Start inspection, формата и копчето Start inspection се сокриваат, а за секој ресторан случајно се генерира и се прикажува бројот на прекршоци, кој е цел број од 0 до 10 (10 поени).
+
+Соодветно, картичките на оние ресторани кои имаат 3 или помалку прекршоци се обојуваат во зелено, картичките со 4 до 7 прекршоци се жолти, а со 8 до 10 прекршоци се црвени (10 поени).
+
+Сите картички во овој момент добиваат копчиња -1 и Close. При клик на копчето -1, бројот на прекршоци на тој ресторан се намалува за 1, но не под 0, при што соодветно се менуваат казната и бојата на картичката (5 поени).
+
+Доколку се притисне копчето Close на дадена картичка, картичката се брише од екранот, а вкупната казна се намалува за казната на тој ресторан (5 поени).
+
+По започнувањето на инспекцијата, над картичките се наоѓа бројач, кој покажува колкава е казната на сите ресторани заедно.
+
+Казната на еден ресторан се пресметува како prekrshoci*500, а ако ресторанот е large, се додава уште 2000 (5 поени).
+
+Во прилог е изгледот на страницата пред и по започнувањето на инспекцијата (10 поени).
+
+Сè пишувате во еден .html фајл. Фајлот да биде именуван ime_prezime_indeks.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #cardsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex-direction: row;
+        }
+
+        .card {
+            margin: 10px;
+            width: 250px;
+            height: 250px;
+            padding: 10px;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+
+</head>
+<body>
+<h1>Restaurant inspection</h1>
+<div id="form">
+    <h2>Register restaurant</h2>
+    <div class="row">
+        <label for="name">Restaurant name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="owner">Owner: </label>
+        <input type="text" id="owner">
+    </div>
+    <div class="row">
+        <label for="city">City: </label>
+        <input type="text" id="city">
+    </div>
+    <div class="row">
+        <label for="size">Size: </label>
+        <select id="size">
+            <option value="small">Small</option>
+            <option value="large">Large</option>
+        </select>
+    </div>
+    <button onclick="addRestaurant()">Add restaurant</button>
+</div>
+
+<h2>Restaurants</h2>
+<button onclick="startInspection()" id="startBtn">Start inspection</button>
+<h3 id="h3" style="display: none">Total fine: <span id="totalFine">0</span></h3>
+<div id="cardsContainer">
+
+</div>
+
+<script>
+    let restaurants = [];
+
+    function addRestaurant() {
+        let name = document.getElementById("name");
+        name = name.value;
+        let owner = document.getElementById("owner");
+        owner = owner.value;
+        let city = document.getElementById("city");
+        city = city.value;
+        let size = document.getElementById("size");
+        size = size.value;
+
+        if (name == "" || owner == "" || city == "" || size == "") {
+            alert("Please fill all the fields");
+            return;
+        }
+
+        for (let i = 0; i < name.length; i++) {
+            if ((name.charAt(i) >= "0" && name.charAt(i) <= "9") || name.charAt(i) == "@" || name.charAt(i) == "#") {
+                alert("Please enter a valid name");
+                return;
+            }
+        }
+        if (document.getElementById(name)) {
+            alert("Name already exists");
+            return;
+        }
+
+        let card = createRestaurant(name, owner, city, size);
+        restaurants.push(card);
+
+        updateCards();
+
+    }
+
+    function createRestaurant(name, owner, city, size) {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.id = name;
+        card.dataset.name = name;
+        card.dataset.owner = owner;
+        card.dataset.city = city;
+        card.dataset.size = size;
+        card.innerHTML = `<p>Restaurant: ${name}</p>
+                          <p>Owner: ${owner}</p>
+                          <p>City: ${city}</p>
+                          <p>Size: ${size}</p>`;
+
+        return card;
+    }
+
+    function startInspection() {
+        if (restaurants.length < 3) {
+            return;
+        }
+
+        let startBtn = document.getElementById("startBtn");
+        startBtn.style.display = "none";
+        let form = document.getElementById("form");
+        form.style.display = "none";
+        let h3 = document.getElementById("h3");
+        h3.style.display = "block";
+
+        for (let i = 0; i < restaurants.length; i++) {
+            let nrViolations = Math.floor(Math.random() * 11);
+            restaurants[i].dataset.nrViolations = String(nrViolations);
+            restaurants[i].dataset.fine = String(calculateFine(restaurants[i]));
+            if (nrViolations <= 3) {
+                restaurants[i].style.backgroundColor = "lightgreen";
+            } else if (nrViolations <= 7) {
+                restaurants[i].style.backgroundColor = "lightyellow";
+            } else if(nrViolations <= 10) {
+                restaurants[i].style.backgroundColor = "indianred";
+            }
+            restaurants[i].innerHTML += `<p class="violations">Violations: ${restaurants[i].dataset.nrViolations}</p>
+                                         <p class="fines">Fine: ${restaurants[i].dataset.fine}</p>
+                                         <div><button onclick="minusOne(this)">-1</button> <button onclick="closeRestaurant(this)">Close</button></div>`;
+        }
+
+        updateTotal();
+
+    }
+
+    function minusOne(button) {
+        let name = button.parentElement.parentElement.dataset.name;
+        let card;
+        for (let i = 0; i < restaurants.length; i++) {
+            if (restaurants[i].dataset.name == name) {
+                card = restaurants[i];
+                break;
+            }
+        }
+        card.dataset.nrViolations = String(parseInt(card.dataset.nrViolations) - 1);
+        if (parseInt(card.dataset.nrViolations) < 0) {
+            card.dataset.nrViolations = "0";
+        }
+        card.dataset.fine = String(calculateFine(card));
+        if (parseInt(card.dataset.nrViolations) <= 3) {
+            card.style.backgroundColor = "lightgreen";
+        } else if (parseInt(card.dataset.nrViolations) <= 7) {
+            card.style.backgroundColor = "lightyellow";
+        } else if(parseInt(card.dataset.nrViolations) <= 10){
+            card.style.backgroundColor = "indianred";
+        }
+        let violations = card.querySelector(".violations");
+        violations.innerHTML = `Violations: ${card.dataset.nrViolations}`;
+        let fines = card.querySelector(".fines");
+        fines.innerHTML = `Fines: ${card.dataset.fine}`;
+        updateCards();
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let total = 0;
+        for (let i = 0; i < restaurants.length; i++) {
+            total += parseInt(restaurants[i].dataset.fine);
+        }
+        let totalFine = document.getElementById("totalFine");
+        totalFine.innerHTML = total;
+    }
+
+    function closeRestaurant(button) {
+        let name = button.parentElement.parentElement.dataset.name;
+        let card;
+        let index = -1;
+        for (let i = 0; i < restaurants.length; i++) {
+            if (restaurants[i].dataset.name == name) {
+                card = restaurants[i];
+                index = i;
+                break;
+            }
+        }
+        restaurants.splice(index, 1);
+
+        updateCards();
+        updateTotal();
+    }
+
+    function calculateFine(restaurant) {
+        let fine = restaurant.dataset.nrViolations * 500;
+        if (restaurant.dataset.size == "large") {
+            fine += 2000;
+        }
+        return fine;
+    }
+
+    function updateCards() {
+        let cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
+        for (let i = 0; i < restaurants.length; i++) {
+            cardsContainer.appendChild(restaurants[i]);
+        }
+    }
+</script>
+</body>
+</html>

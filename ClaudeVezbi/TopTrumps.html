@@ -1,0 +1,549 @@
+<!--Да се направи веб-страница за картичката игра Top Trumps за два играчи. Во горниот дел од веб-страницата се внесуваат податоци за автомобил-картичката и тоа: модел, код, брзина (speed), моќ (power) и тежина (weight). При клик на Add, ако сите полиња се пополнети, во делот „Колекција“ се додава картичка, а полињата не се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали кодот се состои од буква и две цифри (на пример F12), дали веќе го користи некоја друга картичка, а сите три својства да бидат цели броеви од 1 до 100 (10 поени). Со клик на Start game (дозволено ако има парен број картички, најмалку 6) картичките се мешаат и се разделуваат наменимено наместо во два шпила (низи од објекти): првата карта на Играч 1, втората на Играч 2, итн. Формата се сокрива, а во секој дел за играч се прикажува само првата картичка од неговиот шпил со сите свои податоци (15 поени). Играч 1 почнува како на ред играч, а неговата картичка е обележана со рамка. Со клик на едно од трите својства (speed, power или weight) на картичката на играчот кој е на ред се избира својството за споредба; клик на картичката на другиот играч не прави ништо (20 поени). При споредбата победува поголемата вредност (за weight победува помалата). Победникот ги зема двете картички на дното на својот шпил (се бришат со shift од почетокот и се додаваат со push на крајот, прво неговата, па на противникот), а тој станува следниот играч на ред (15 поени). Ако вредностите се исти, двете картички одат во „пот“ (низа), редот се пренесува на другиот играч, а наследниот победник ги зема сите картички од потот заедно со двете од рундата (10 поени). Под секој шпил се прикажува бројот на негови картички, а над нив порака кој е на ред и кој ја добил последната рунда (5 поени). Играта завршува кога еден играч ќе остане без картички или по 15 рунди (победува оној со повеќе картички, потот се не брои) и тогаш се печати победникот, а својствата на картичките веќе не реагираат на клик (5 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[Model][Code][Speed][Power][Weight] [Add] [Start game]
+Играч 1 (на ред)          Играч 2
+╔════════════╗         ┌────────────┐
+║ Golf F12   ║         │ Civic C07  │
+║ speed  80  ║  ← click│ speed  75  │
+║ power  60  ║         │ power  90  │
+║ weight 40  ║         │ weight 55  │
+╚════════════╝         └────────────┘
+Картички: 4                Картички: 4        Пот: 0-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Top Trumps</title>
+
+    <style>
+        .row {
+            margin: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #collection {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        #collection h1 {
+            width: 100%;
+            text-align: center;
+        }
+
+        .card {
+            margin: 10px;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        #arena {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #players {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        #firstContainer, #secondContainer {
+            text-align: center;
+        }
+
+        .speed, .weight, .power {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="form">
+    <h1>Top Trumps</h1>
+
+    <div class="row">
+        <label for="model">Model: </label>
+        <input type="text" id="model">
+    </div>
+
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+
+    <div class="row">
+        <label for="speed">Speed: </label>
+        <input type="number" id="speed">
+    </div>
+
+    <div class="row">
+        <label for="power">Power: </label>
+        <input type="number" id="power">
+    </div>
+
+    <div class="row">
+        <label for="weight">Weight: </label>
+        <input type="number" id="weight">
+    </div>
+
+    <button onclick="addCard()">Add</button>
+    <button onclick="startGame()">Start game</button>
+
+    <div id="collection">
+        <h1>Collection</h1>
+    </div>
+</div>
+
+<div id="arena">
+
+    <h1>Arena</h1>
+
+    <p>Next up: <span id="upNext"></span></p>
+    <p id="winner"></p>
+
+    <div id="players">
+
+        <div id="firstContainer">
+            <h2>Player 1</h2>
+
+            <div id="playerOne"></div>
+
+            <p>Cards: <span id="nrCardsFirst"></span></p>
+        </div>
+
+        <div id="secondContainer">
+            <h2>Player 2</h2>
+
+            <div id="playerTwo"></div>
+
+            <p>Cards: <span id="nrCardsSecond"></span></p>
+        </div>
+
+    </div>
+
+    <p>Pot: <span id="potCount">0</span></p>
+
+</div>
+
+
+<script>
+
+    let cards = [];
+    let player1 = [];
+    let player2 = [];
+
+    let nextUp = 1;
+    let pot = [];
+    let rounds = 0;
+    let gameOver = false;
+
+
+    function addCard() {
+
+        let model = document.getElementById("model").value;
+        let code = document.getElementById("code").value;
+        let speed = document.getElementById("speed").value;
+        let power = document.getElementById("power").value;
+        let weight = document.getElementById("weight").value;
+
+
+        // Check whether all fields are filled in
+        if (model == "" || code == "" || speed == "" ||
+            power == "" || weight == "") {
+
+            alert("Please fill out the form completely");
+            return;
+        }
+
+
+        // Check code format and uniqueness
+        if (!/^[a-zA-Z][0-9]{2}$/.test(code) ||
+            cards.some(card => card.dataset.code == code)) {
+
+            alert("Please enter a valid and unique code");
+            return;
+        }
+
+
+        // Check that all properties are integers from 1 to 100
+        if (
+            !Number.isInteger(Number(speed)) || speed < 1 || speed > 100 ||
+            !Number.isInteger(Number(power)) || power < 1 || power > 100 ||
+            !Number.isInteger(Number(weight)) || weight < 1 || weight > 100
+        ) {
+
+            alert("Please enter valid values");
+            return;
+        }
+
+
+        let card = createCard(model, code, speed, power, weight);
+
+        cards.push(card);
+
+        let collection = document.getElementById("collection");
+        collection.appendChild(card);
+
+    }
+
+
+    function createCard(model, code, speed, power, weight) {
+
+        let cardDiv = document.createElement("div");
+
+        cardDiv.classList.add("card");
+
+        cardDiv.id = code;
+
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.model = model;
+        cardDiv.dataset.speed = speed;
+        cardDiv.dataset.power = power;
+        cardDiv.dataset.weight = weight;
+
+        cardDiv.innerHTML = `
+            <p>${model} ${code}</p>
+            <p class="speed" onclick="compare(this)">Speed: ${speed}</p>
+            <p class="power" onclick="compare(this)">Power: ${power}</p>
+            <p class="weight" onclick="compare(this)">Weight: ${weight}</p>
+        `;
+
+        return cardDiv;
+    }
+
+
+    function shuffle() {
+
+        for (let i = cards.length - 1; i > 0; i--) {
+
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = cards[i];
+            cards[i] = cards[j];
+            cards[j] = temp;
+
+        }
+
+    }
+
+
+    function startGame() {
+
+        // There must be an even number of cards, at least 6
+        if (cards.length < 6 || cards.length % 2 != 0) {
+
+            alert("You need an even number of cards, at least 6!");
+            return;
+        }
+
+
+        document.getElementById("form").style.display = "none";
+        document.getElementById("arena").style.display = "flex";
+
+
+        shuffle();
+
+
+        // Distribute cards alternately
+        for (let i = 0; i < cards.length; i++) {
+
+            if (i % 2 == 0) {
+                player1.push(cards[i]);
+            } else {
+                player2.push(cards[i]);
+            }
+
+        }
+
+
+        setup();
+
+    }
+
+
+    function compare(paragraph) {
+
+        // Do nothing if the game has ended
+        if (gameOver) return;
+
+
+        // Only the active player's card can be clicked
+        if (nextUp == 1 && paragraph.parentElement != player1[0]) return;
+        if (nextUp == 2 && paragraph.parentElement != player2[0]) return;
+
+
+        let property = paragraph.className;
+
+        let value1 = Number(player1[0].dataset[property]);
+        let value2 = Number(player2[0].dataset[property]);
+
+
+        let player1Wins = false;
+        let player2Wins = false;
+
+
+        // For weight, the lower value wins
+        if (property == "weight") {
+
+            if (value1 < value2) {
+                player1Wins = true;
+            } else if (value1 > value2) {
+                player2Wins = true;
+            }
+
+        } else {
+
+            if (value1 > value2) {
+                player1Wins = true;
+            } else if (value1 < value2) {
+                player2Wins = true;
+            }
+
+        }
+
+
+        let winner = document.getElementById("winner");
+
+
+        if (player1Wins) {
+
+            // Player 1 takes their own card first
+            player1.push(player1.shift());
+
+            // Then takes Player 2's card
+            player1.push(player2.shift());
+
+
+            // Player 1 also takes all cards from the pot
+            while (pot.length > 0) {
+                player1.push(pot.shift());
+            }
+
+
+            winner.innerHTML = "Player 1 won the last round!";
+
+            nextUp = 1;
+
+        } else if (player2Wins) {
+
+            // Player 2 takes their own card first
+            player2.push(player2.shift());
+
+            // Then takes Player 1's card
+            player2.push(player1.shift());
+
+
+            // Player 2 also takes all cards from the pot
+            while (pot.length > 0) {
+                player2.push(pot.shift());
+            }
+
+
+            winner.innerHTML = "Player 2 won the last round!";
+
+            nextUp = 2;
+
+        } else {
+
+            // Draw: both cards go into the pot
+            pot.push(player1.shift());
+            pot.push(player2.shift());
+
+
+            winner.innerHTML = "Draw!";
+
+            // Turn passes to the other player
+            nextUp = (nextUp == 1) ? 2 : 1;
+
+        }
+
+
+        rounds++;
+
+        setup();
+
+    }
+
+
+    function setup() {
+
+        // Display the current cards
+        displayCards();
+
+
+        // Update the information
+        document.getElementById("nrCardsFirst").innerHTML =
+            String(player1.length);
+
+        document.getElementById("nrCardsSecond").innerHTML =
+            String(player2.length);
+
+        document.getElementById("potCount").innerHTML =
+            String(pot.length);
+
+        document.getElementById("upNext").innerHTML =
+            "Player " + nextUp;
+
+
+        // Check whether the game has ended before accessing the cards
+        if (checkWinner()) {
+            return;
+        }
+
+
+        let card1 = document.getElementById("playerOne").children[0];
+        let card2 = document.getElementById("playerTwo").children[0];
+
+
+        // Reset both borders
+        card1.style.border = "1px solid black";
+        card2.style.border = "1px solid black";
+
+
+        if (nextUp == 1) {
+
+            // Highlight Player 1's card
+            card1.style.border = "5px solid gold";
+
+
+            // Disable Player 2's properties
+            let p = card2.querySelectorAll(".speed, .weight, .power");
+
+            for (let i = 0; i < p.length; i++) {
+                p[i].onclick = null;
+            }
+
+
+            // Enable Player 1's properties
+            p = card1.querySelectorAll(".speed, .weight, .power");
+
+            for (let i = 0; i < p.length; i++) {
+                p[i].onclick = function () {
+                    compare(this);
+                };
+            }
+
+        } else {
+
+            // Highlight Player 2's card
+            card2.style.border = "5px solid gold";
+
+
+            // Disable Player 1's properties
+            let p = card1.querySelectorAll(".speed, .weight, .power");
+
+            for (let i = 0; i < p.length; i++) {
+                p[i].onclick = null;
+            }
+
+
+            // Enable Player 2's properties
+            p = card2.querySelectorAll(".speed, .weight, .power");
+
+            for (let i = 0; i < p.length; i++) {
+                p[i].onclick = function () {
+                    compare(this);
+                };
+            }
+
+        }
+
+    }
+
+
+    function checkWinner() {
+
+        // Game ends after 15 rounds or when a player has no cards
+        if (rounds >= 15 || player1.length == 0 || player2.length == 0) {
+
+            gameOver = true;
+
+
+            // Compare only the cards in the two decks.
+            // Cards in the pot do not count.
+            if (player1.length > player2.length) {
+
+                document.getElementById("winner").innerHTML =
+                    "Game over! Player 1 is the winner!";
+
+            } else if (player1.length < player2.length) {
+
+                document.getElementById("winner").innerHTML =
+                    "Game over! Player 2 is the winner!";
+
+            } else {
+
+                document.getElementById("winner").innerHTML =
+                    "Game over! It is a draw!";
+
+            }
+
+
+            // Disable all property clicks
+            let properties = document.querySelectorAll(
+                "#playerOne .speed, #playerOne .power, #playerOne .weight, " +
+                "#playerTwo .speed, #playerTwo .power, #playerTwo .weight"
+            );
+
+            for (let i = 0; i < properties.length; i++) {
+                properties[i].onclick = null;
+            }
+
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+
+    function displayCards() {
+
+        let playerOne = document.getElementById("playerOne");
+        let playerTwo = document.getElementById("playerTwo");
+
+
+        // Remove previously displayed cards
+        playerOne.innerHTML = "";
+        playerTwo.innerHTML = "";
+
+
+        // Display only the first card of each deck
+        if (player1.length > 0) {
+            playerOne.appendChild(player1[0]);
+        }
+
+        if (player2.length > 0) {
+            playerTwo.appendChild(player2[0]);
+        }
+
+    }
+
+</script>
+
+</body>
+</html>

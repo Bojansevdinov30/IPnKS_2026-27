@@ -1,0 +1,262 @@
+<!--Да се направи веб-страница за аукција на колекционерски картички. Во горниот дел од веб-страницата се внесуваат податоци за картичката и тоа: наслов, код, почетна цена, од паѓачка листа се избира реткост (common, rare, legendary) и со checkbox се означува дали картичката е потпишана (signed). При кликнување на копчето Add, ако сите полиња се пополнети, се додава картичка во делот „Аукција“, а полињата не се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали кодот е во формат три мали букви - две цифри (на пример abc-12 не е валиден, а abc12 е), а почетната цена да е цел број помеѓу 10 и 5000 (10 поени). Ако веќе постои картичка со тој код, не се додава нова, туку на постоечката се ажурираат насловот, цената, реткоста и потписот (10 поени). Цената на картичката се пресметува како почетна цена помножена со коефициент според реткоста (common 1, rare 2, legendary 5, да се реши со switch), а ако е потпишана се зголемува уште за 15% (заокружено на цел број) (10 поени). Картичките се прикажуваат секогаш подредени по цена опаѓачки, по секое додавање, ажурирање или понуда (низата се сортира, а контејнерот повторно се исцртува) (15 поени). Секоја картичка има копче Bid +10%, кое ја зголемува цената за 10% (заокружено на цел број) и ја дополнува листата „Понуди“ (низа од претходните цени) на таа картичка, која се прикажува на картичката. Откако ќе се направат 3 понуди на една картичка, копчето Bid се оневозможува, картичката станува жолта и се појавува ново копче Sell (15 поени). Со клик на Sell картичката се брише, а на бројачот „Вкупен приход“ се додава нејзината цена (10 поени). Над картичките има паѓачка листа за филтрирање (all, common, rare, legendary) која при промена (onchange) ги сокрива картичките што не одговараат на изборот, без да ги брише, и покажува колку картички се моментално видливи (10 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[Title][Code][Price][Rarity ▼] [ ] Signed [Add]
+Филтер: [all ▼]   Видливи: 3   Вкупен приход: 480
+┌ abc12 ─────────┐ ┌ xyz07 ─────────┐
+│ Dragon  legendary│ │ Knight  common   │
+│ Цена: 665        │ │ Цена: 120        │
+│ Понуди: 550, 605 │ │ Понуди: 110      │
+│ [Bid +10%]       │ │ [Bid +10%]       │
+└─────────────────┘ └─────────────────┘-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+            height: 250px;
+            border: 1px solid black;
+            margin: 10px;
+        }
+
+        #auctionHouse {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="form">
+    <h1>Auction Game</h1>
+    <div class="row">
+        <label for="title">Title: </label>
+        <input type="text" id="title">
+    </div>
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="price">Price: </label>
+        <input type="number" id="price">
+    </div>
+    <div class="row">
+        <label for="rarity">Rarity: </label>
+        <select id="rarity">
+            <option value="common">common</option>
+            <option value="rare">rare</option>
+            <option value="legendary">legendary</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="signed">Signed: </label>
+        <input type="checkbox" id="signed" value="signed">
+    </div>
+
+    <button onclick="addCard()">Add</button>
+</div>
+<h1>Auction House</h1>
+<p>Active: <span id="activeAmount">0</span></p>
+<p>Visible: <span id="visibleAmount">0</span></p>
+<div class = "row">
+    <label for="filter">Filter: </label>
+    <select id="filter" onchange="updateCards()">
+        <option value="all">All</option>
+        <option value="common">Common</option>
+        <option value="rare">Rare</option>
+        <option value="legendary">Legendary</option>
+    </select>
+</div>
+
+<p>Total amount: <span id="totalAmount">0</span></p>
+<div id="auctionHouse">
+
+</div>
+
+
+<script>
+    let cards = [];
+    let total = 0;
+
+    function addCard() {
+        let title = document.getElementById("title").value;
+        let code = document.getElementById("code");
+        code = code.value;
+        let price = document.getElementById("price");
+        price = price.value;
+        let rarity = document.getElementById("rarity");
+        rarity = rarity.value;
+        let signed = document.getElementById("signed");
+        signed = signed.checked; // true if checked, false otherwise
+
+        if (title == "" || code == "" || price == "" || rarity == "") {
+            alert("Please enter all fields");
+            return;
+        }
+
+        if (!/^[a-zA-Z]{3}[0-9]{2}$/.test(code)) {
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if (!(price >= 10 && price <= 5000)) {
+            alert("Please enter a valid price");
+            return;
+        }
+
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.code == code) {
+                cards.splice(i, 1, createCard(title, code, price, rarity, signed));
+                updateCards();
+                return;
+            }
+        }
+
+        let cardDiv = createCard(title, code, price, rarity, signed);
+        cards.push(cardDiv);
+        updateCards();
+
+
+    }
+
+    function createCard(title, code, price, rarity, signed) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        let coefficent = 0;
+        switch(rarity){
+            case "common":
+                coefficent = 1;
+                break;
+            case "rare":
+                coefficent = 2;
+                break;
+            case "legendary":
+                coefficent = 5;
+                break;
+        }
+        price = parseFloat(price) * coefficent;
+        if(signed){
+            price = parseFloat(price) * 1.15;
+        }
+        price = parseFloat(price).toFixed(2);
+        cardDiv.innerHTML = `<p>${code}</p>
+                             <p>${title}</p>
+                             <p>Price: <span class = "price">${price}</span></p>
+                             <p>Bids: <span class = "bids"></span></p>
+                             <button onclick = "bid(this)">Bid + 10%</button>`;
+
+        if (rarity == "common") {
+            cardDiv.style.backgroundColor = "lightgray"
+        } else if (rarity == "rare") {
+            cardDiv.style.backgroundColor = "lightgreen"
+        } else if (rarity == "legendary") {
+            cardDiv.style.backgroundColor = "lightyellow"
+        }
+        cardDiv.id = code;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.title = title;
+        cardDiv.dataset.price = price;
+        cardDiv.dataset.rarity = rarity;
+        cardDiv.dataset.signed = signed;
+        cardDiv.dataset.nrBids = String(0);
+        // cardDiv.dataset.bids = [];
+
+        return cardDiv;
+    }
+
+    function updateCards() {
+        cards.sort((a, b) => a.dataset.price - b.dataset.price);
+        let filter = document.getElementById("filter").value;
+        let visibleAmount = document.getElementById("visibleAmount");
+        let counter = 0;
+        let auctionHouse = document.getElementById("auctionHouse");
+        auctionHouse.innerHTML = "";
+        if(filter == "all"){
+            for (let i = 0; i < cards.length; i++) {
+                auctionHouse.appendChild(cards[i]);
+                counter++;
+            }
+        }else if(filter == "common"){
+            for (let i = 0; i < cards.length; i++) {
+                if(cards[i].dataset.rarity == "common"){
+                    auctionHouse.appendChild(cards[i]);
+                    counter++;
+                }
+            }
+        }else if(filter == "rare"){
+            for (let i = 0; i < cards.length; i++) {
+                if(cards[i].dataset.rarity == "rare"){
+                    auctionHouse.appendChild(cards[i]);
+                    counter++;
+                }
+            }
+        }else if(filter == "legendary"){
+            for (let i = 0; i < cards.length; i++) {
+                if(cards[i].dataset.rarity == "legendary"){
+                    auctionHouse.appendChild(cards[i]);
+                    counter++;
+                }
+            }
+        }
+        visibleAmount.innerHTML = String(counter);
+        let activeAmount = document.getElementById("activeAmount");
+        activeAmount.innerHTML = String(cards.length);
+    }
+
+    function bid(button) {
+        let cardDiv = button.parentElement;
+        let bids = cardDiv.getElementsByClassName("bids")[0];
+        bids.innerHTML += `${cardDiv.dataset.price} `;
+        let price = cardDiv.getElementsByClassName("price")[0];
+        cardDiv.dataset.price = String((1.1 * parseFloat(price.innerHTML)).toFixed(2));
+        price.innerHTML = cardDiv.dataset.price;
+        let nrBids = parseInt(cardDiv.dataset.nrBids);
+        cardDiv.dataset.nrBids = String(nrBids + 1);
+        updateCards();
+        if (nrBids == 3) {
+            button.disabled = true;
+            cardDiv.style.backgroundColor = "gold";
+            cardDiv.innerHTML += `<button onclick = "sell(this)">Sell</button>`;
+        }
+    }
+
+    function sell(button) {
+        let cardDiv = button.parentElement;
+        total += parseFloat(cardDiv.dataset.price);
+        let totalAmount = document.getElementById("totalAmount");
+        totalAmount.innerHTML = total.toFixed(2);
+
+
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.code == cardDiv.dataset.code) {
+                cards.splice(i, 1);
+            }
+        }
+        updateCards();
+    }
+
+    // function filter(){
+    //
+    // }
+
+
+</script>
+</body>
+</html>

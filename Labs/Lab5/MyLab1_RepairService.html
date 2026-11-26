@@ -1,0 +1,193 @@
+<!--Да се направи веб-страница за регистрирање на поправки во сервис за уреди. Во горниот дел од веб-страницата се внесуваат податоци за поправката, и тоа име и презиме на клиентот, уред, код на поправката, број на работни часови и од паѓачка листа се избира итноста на поправката (regular, urgent). Под формата се наоѓаат две табели, една табела во која се додаваат редовните поправки, а во другата табела се додаваат итните поправки. При кликнување на копчето Add, ако сите полиња се пополнети, се додава нова поправка во соодветната табела според итноста, а полињата не се ресетираат (15 поени). Ако не се внесени сите полиња, се печати порака за грешка (5 поени).
+
+Пред да се додаде новата поправка, потребно е да се провери дали во некоја од двете табели веќе постои поправка која го има тој код. Доколку веќе има додадено поправка со тој код, потребно е да се прикаже порака за грешка и поправката да не се додава (10 поени). Исто така, треба да се провери дали кодот на поправката е долг точно 8 знаци, дали првите шест знаци се бројки и дали последните два се големи латинични букви, во спротивно се печати порака за грешка и поправката не се додава (15 поени).
+
+Дополнително, бројот на работни часови треба да биде цел број поголем од 0, во спротивно се печати порака за грешка и поправката не се додава (5 поени).
+
+При прикажувањето на секоја поправка, се прикажува името и презимето на клиентот, уредот, кодот, бројот на часови, цената и копче Repaired. Цената се пресметува како 300 + chasovi*500, а ако поправката е итна, се додава уште 400 (5 поени).
+
+При клик на копчето Repaired, редицата се обојува во зелено и копчето се брише од редицата (10 поени).
+
+Во поле над табелите се наоѓа бројач кој ја прикажува вкупната цена на поправките од двете табели кои сè уште не се завршени (5 поени).
+
+Во прилог е изгледот на страницата (10 поени).
+
+Сè пишувате во еден .html фајл. Фајлот да биде именуван ime_prezime_indeks.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #tableContainer {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-right: 100px;
+        }
+
+        th, tr, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+
+    </style>
+</head>
+<body>
+<h1 style="display: flex; justify-content: center; align-items: center; width: 100%">Repair service</h1>
+<div id="form">
+    <div class="row">
+        <label for="name">Name and surname: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="device">Device: </label>
+        <input type="text" id="device">
+    </div>
+    <div class="row">
+        <label for="code">Repair code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="hours">Working hours: </label>
+        <input type="text" id="hours">
+    </div>
+    <div class="row">
+        <label for="urgency">Urgency: </label>
+        <select id="urgency">
+            <option value="regular">Regular</option>
+            <option value="urgent">Urgent</option>
+        </select>
+    </div>
+    <button onclick="addToTable()">Add</button>
+</div>
+
+<p>Unfinished repairs total: <span style="font-weight: bold" id="total"></span></p>
+
+<div id="tableContainer">
+    <div id="table1">
+        <h2>Regular repairs</h2>
+        <table id="regular">
+            <tr>
+                <th>Name</th>
+                <th>Device</th>
+                <th>Code</th>
+                <th>Hours</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+    </div>
+    <div id="table2">
+        <h2>Urgent repairs</h2>
+        <table id="urgent">
+            <tr>
+                <th>Name</th>
+                <th>Device</th>
+                <th>Code</th>
+                <th>Hours</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<script>
+    let totalCost = 0;
+
+
+    function addToTable() {
+        let name = document.getElementById("name");
+        name = name.value;
+        let device = document.getElementById("device");
+        device = device.value;
+        let code = document.getElementById("code");
+        code = code.value;
+        let hours = document.getElementById("hours");
+        hours = Number(hours.value);
+        let urgency = document.getElementById("urgency");
+        urgency = urgency.value;
+
+        if(name == "" || device == "" || code == "" || hours == "" || urgency == "") {
+            alert("Please fill in all the fields")
+            return;
+        }
+
+        if(!/^[0-9]{6}[A-Z]{2}$/.test(code) || document.getElementById(code)) {
+            console.log(/^[0-9]{6}[A-Z]{2}$/.test(code))
+            console.log(document.getElementById(code))
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if(isNaN(hours) || !(hours > 0) || !Number.isInteger(hours)) {
+            alert("Please enter valid working hours");
+            return;
+        }
+
+        let row = createRow(name, device, code, hours, urgency);
+        let table = document.getElementById(urgency);
+        table.appendChild(row);
+        let total = document.getElementById("total");
+        total.innerHTML = String(totalCost);
+
+
+    }
+
+    function createRow(name, device, code, hours, urgency){
+        let tr = document.createElement("tr");
+        tr.id = code;
+        let price = calculatePrice(hours, urgency);
+        totalCost += price;
+        tr.innerHTML = `<td>${name}</td>
+<td>${device}</td>
+<td>${code}</td>
+<td>${hours}</td>
+<td>${price}</td>
+<td><button onclick="repair(this)">Repaired</button></td>`;
+
+        return tr;
+    }
+
+    function calculatePrice(hours, urgency) {
+        let price = 300 + hours * 500;
+        if(urgency == "urgent"){
+            price+=400;
+        }
+        return price;
+    }
+
+    function repair(button){
+        let row = button.parentElement.parentElement;
+        row.style.backgroundColor = "lightgreen";
+        button.remove();
+        totalCost -= parseInt(row.children[4].innerHTML);
+        let total = document.getElementById("total");
+        total.innerHTML = String(totalCost);
+    }
+
+
+</script>
+</body>
+</html>

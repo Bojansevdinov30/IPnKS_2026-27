@@ -1,0 +1,280 @@
+<!--Да се направи веб-страница за продажба на лотариски картички „стругачки“. Во горниот дел од веб-страницата се внесуваат податоци за купувачот и тоа: име на купувачот, код на картичката и од паѓачка листа цена на картичката (50, 100 или 200 денари). При клик на копчето Buy, ако сите полиња се пополнети, се додава нова картичка, а полињата се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали кодот има точно 5 знаци каде што се дозволени само големи букви и цифри, дали некоја картичка веќе го користи тој код и дали името на купувачот се состои само од букви (10 поени). Секоја картичка се состои од 6 затворени полиња (по 3 во два реда) со сива позадина и знак „?“, заедно со името на купувачот, кодот и цената (10 поени). Со клик на затворено поле тој се открива: се генерира случаен симбол од низа ["🍒", "🍋", "7", "⭐", "🔔"] и се прикажува во полето. Едно поле може да се открие само еднаш, а на една картичка можат да се откриат најмногу 4 од 6те полиња (20 поени). Еднаш како ќе се откриат 4 полиња, преостанатите полиња се заклучуваат и се пресметува добивката: се бројат колку пати се појавил секој симбол (да се користи објект како бројач и for...in). Ако еден симбол се појавил 3 пати, добивката е цената × 2; ако се појавил 4 пати, цената × 5; ако тој симбол е „7“, добивката се уште удвојува. Во спротивно добивката е 0 (20 поени). Добитна картичка станува зелена и го прикажува износот на добивката, а картичка без добивка станува сива (5 поени). Смо на добитната картичка се појавува копче Collect кое ја брише картичката и ја додава добивката кон „Исплатено“ (5 поени). Над картичките се прикажуваат три бројачи: „Вкупен приход“ (збир на цените на сите купени картички), „Исплатено“ и „Добивка“ (приход минус исплатено), при што добивката се пишува со црвен текст ако е негативна (10 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[Buyer][Code][Price ▼] [Buy]
+Приход: 350   Исплатено: 200   Добивка: 150
+┌ AB12C ─ Иван ─ 100ден ┐ ┌ ZZ99Q ─ Марија ─ 50ден ┐
+│ [🍒][ ? ][🍒]      │ │ [ ? ][ ? ][ ? ]       │
+│ [ ? ][🍒][ ? ]      │ │ [ ? ][ ? ][ ? ]       │
+│ Добивка: 200      │ │                       │
+│ [Collect]          │ │                       │
+└───────────────────┘ └───────────────────┘-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+            height: 250px;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid black;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .smallCard {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            width: 20%;
+            height: 25%;
+            border: 1px solid black;
+            margin: 10px;
+            background-color: lightgray;
+            cursor: pointer;
+        }
+
+        .innerDiv {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 10px;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="name">Name:</label>
+        <input type="text" id="name">
+    </div>
+
+    <div class="row">
+        <label for="code">Code:</label>
+        <input type="text" id="code">
+    </div>
+
+    <div class="row">
+        <label for="price">Price:</label>
+        <select id="price">
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+
+    <button onclick="buy()">Buy</button>
+
+</div>
+
+<p>Revenue: <span id="totalRevenue">0</span></p>
+<p>Paid: <span id="totalPaid">0</span></p>
+<p>Profit: <span id="totalProfit">0</span></p>
+
+<div id="cardContainer">
+
+</div>
+
+<script>
+
+    let cards = [];
+
+    let symbols = ["🍒", "🍋", "7", "⭐", "🔔"];
+
+    let paid = 0;
+    let rev = 0;
+
+    function buy() {
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let price = document.getElementById("price").value;
+
+        if (name == "" || code == "" || price == "") {
+            alert("Please enter all fields");
+            return;
+        }
+
+        if (!/^[A-Z0-9]{5}$/.test(code) || document.getElementById(code)) {
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if (!/^[a-zA-Z]+$/.test(name)) {
+            alert("Please enter valid name");
+            return;
+        }
+
+        let card = createCard(name, code, price);
+        rev += parseInt(price);
+        cards.push(card);
+        updateCards()
+
+    }
+
+    function createCard(name, code, price) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+
+        cardDiv.id = code;
+
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.price = price;
+
+        cardDiv.innerHTML = `<p>Code: ${code}</p>
+                             <p>Name: ${name}</p>
+                             <p>Price: ${price}</p>`;
+
+        let innerDiv = document.createElement("div");
+        innerDiv.classList.add("innerDiv");
+
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 3; j++) {
+                let smallCard = document.createElement("div");
+                smallCard.classList.add("smallCard");
+                smallCard.dataset.i = String(i);
+                smallCard.dataset.j = String(j);
+                smallCard.dataset.value = "?";
+                innerDiv.dataset.nrRevealed = String(0);
+                smallCard.setAttribute("onclick", "reveal(this)");
+                smallCard.innerHTML = "?";
+                innerDiv.appendChild(smallCard);
+            }
+        }
+        cardDiv.appendChild(innerDiv);
+        return cardDiv;
+    }
+
+    function reveal(smallCard) {
+        let innerDiv = smallCard.parentElement;
+        if (innerDiv.dataset.nrRevealed >= "4") {
+            alert("You can reveal a maximum of 4 small cards per card");
+            return;
+        }
+        if (smallCard.dataset.value != "?") {
+            alert("Small card already revealed");
+            return;
+        }
+        let index = Math.floor(Math.random() * symbols.length);
+        let symbol = symbols[index];
+        smallCard.dataset.value = symbol;
+        smallCard.innerHTML = symbol;
+        smallCard.style.backgroundColor = "white";
+        innerDiv.dataset.nrRevealed = String(parseInt(innerDiv.dataset.nrRevealed) + 1);
+
+        checkRevenue(smallCard);
+    }
+
+
+    function checkRevenue(smallCard) {
+        let innerDiv = smallCard.parentElement;
+        if (innerDiv.dataset.nrRevealed < "4") {
+            return;
+        }
+        let card = innerDiv.parentElement
+        let smallCards = innerDiv.children;
+        let occurrences = new Array(symbols.length);
+        let max = -1;
+        let maxIndex = -1;
+        let revenue = parseInt(card.dataset.price);
+        occurrences.fill(0);
+        for (let i = 0; i < smallCards.length; i++) {
+            let card = smallCards[i];
+            for (let j = 0; j < symbols.length; j++) {
+                if (card.dataset.value == symbols[j]) {
+                    occurrences[j]++;
+                    if (occurrences[j] > max) {
+                        max = occurrences[j];
+                        maxIndex = j;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (max == 3) {
+            revenue *= 2;
+        } else if (max == 4) {
+            revenue *= 5;
+        } else {
+            revenue = 0;
+        }
+        if (maxIndex == 2) {
+            revenue *= 2;
+        }
+        card.dataset.revenue = String(revenue);
+        if (revenue != 0) {
+            card.style.backgroundColor = "lightgreen";
+            card.innerHTML += `<p>Revenue: ${revenue}</p>
+                               <button onclick="collect(this)">Collect</button>`; // add revenue to Paid
+        } else {
+            card.style.backgroundColor = "lightgray";
+        }
+
+        updateCards();
+
+
+    }
+
+    function collect(button) {
+        card = button.parentElement;
+        paid += parseInt(card.dataset.revenue);
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.code == card.dataset.code) {
+                cards.splice(i, 1);
+                break;
+            }
+        }
+        updateCards();
+    }
+
+    function updateCards() {
+        let cardContainer = document.getElementById("cardContainer");
+        cardContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardContainer.appendChild(cards[i]);
+        }
+
+        let totalRevenue = document.getElementById("totalRevenue");
+        let totalPaid = document.getElementById("totalPaid");
+        let totalProfit = document.getElementById("totalProfit");
+        totalRevenue.innerHTML = String(rev);
+        totalPaid.innerHTML = String(paid);
+        totalProfit.innerHTML = String(rev - paid);
+        if (rev - paid < 0) {
+            totalProfit.style.color = "red";
+        } else {
+            totalProfit.style.color = "black";
+        }
+    }
+</script>
+</body>
+</html>

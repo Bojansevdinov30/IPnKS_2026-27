@@ -1,0 +1,291 @@
+<!--Да се направи веб-страница за игра на Бинго. Во горниот дел од веб-страницата се внесуваат податоци за играчот и тоа: име и презиме, код на билетот и влог. При клик на копчето Add, ако сите полиња се пополнети, се додава нова картичка за играчот, а полињата се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред додавање треба да се провери дали кодот е во формат една голема буква и три цифри (на пример A123), дали е слободен, а влогот да е број од 50 до 500 делив со 50 (10 поени). Секоја нова картичка генерира случаен бинго билет од 3×3 различни броеви од 1 до 30. Билетот се чува како дводимензионална низа и се прикажува како табела внатре во картичката, заедно со името, кодот и влогот (15 поени). Копчето Draw number е активно само кога има најмалку два билета. Со него се извлекува случаен број од 1 до 30 кој не бил извлечен досега и се додава како топче во листата „Извлечени броеви“; по првото извлекување копчето Add се оневозможува (15 поени). Секое поле од билетите што го содржи извлечениот број се обојува зелено (10 поени). По секојо извлекување се проверува дали некој билет има комплетиран цел ред, колона или дијагонала. Тој билет добива златна рамка и порака BINGO (15 поени). Играта завршува повеќе од првиот бинго: копчето Draw number се оневозможува, а добивката е збирот од влоговите на сите играчи. Ако во исто извлекување повеќе билети имаат бинго, добивката се дели порамно и се испишува на секој победнички билет (10 поени). Над билетите се прикажува бројач кој покажува колку броеви од 1 до 30 ја не се извлечени (5 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[ Име и презиме ][ Code ][ Влог ] [Add]   [Draw number]  Преостанати: 24
+Извлечени: (7) (19) (3) (28) (11) (22)
+┌ A123 ─ Ана ─ Влог 100 ┐ ┌ B456 ─ Борис ─ Влог 50 ┐
+│ | 7 |12 |30 |          │ │ | 2 |19 | 9 |            │
+│ | 4 |19 | 8 |          │ │ |25 |11 |30 |            │
+│ |22 |15 | 1 |          │ │ | 3 | 5 |14 |            │
+└────────────────────────┘ └────────────────────────┘-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border: 1px solid black;
+            padding: 5px;
+            margin: 10px;
+        }
+
+        .combination {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 25%;
+            padding: 5px;
+            border: 1px solid grey;
+        }
+
+        #cardContainer, #ballsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .ball {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 30px;
+            height: 30px;
+            border: 1px solid grey;
+            padding: 5px;
+            border-radius: 100%;
+            margin: 10px;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="name">Name and surname: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="amount">Amount: </label>
+        <input type="text" id="amount">
+    </div>
+    <button id="addBtn" onclick="addCard()">Add</button>
+    <button id="drawBtn" onclick="drawNumber()" disabled>Draw number</button>
+    <p>Remaining: <span id="remaining">30</span></p>
+</div>
+
+<div id="ballsContainer">
+    <p>Picked: </p>
+</div>
+
+<div id="cardContainer">
+
+</div>
+
+
+
+<script>
+    let cards = [];
+    let numbers = [];
+    // let tickets = [];
+    let drawNums = [];
+    let winningAmount = 0;
+    for (let i = 1; i <= 30; i++) {
+        numbers.push(i);
+    }
+
+    function addCard() {
+        let name = document.getElementById("name");
+        name = name.value;
+        let code = document.getElementById("code");
+        code = code.value;
+        let amount = document.getElementById("amount");
+        amount = amount.value;
+
+        if (name == "" || code == "" || amount == "") {
+            alert("Please fill out all fields");
+            return;
+        }
+
+        if (!/^[A-Z][0-9]{3}$/.test(code) || document.getElementById(code)) {
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if (!(amount >= 50 && amount <= 500) || amount % 50 != 0) {
+            alert("Please enter a valid amount");
+            return;
+        }
+
+        let cardDiv = createCard(name, code, amount);
+
+        cards.push(cardDiv);
+
+        if (cards.length >= 2) {
+            let drawBtn = document.getElementById("drawBtn");
+            drawBtn.disabled = false;
+        }
+
+    }
+
+    function shuffle() {
+        for (let i = numbers.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = numbers[i];
+            numbers[i] = numbers[j];
+            numbers[j] = temp;
+        }
+    }
+
+    function createCard(name, code, amount) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.amount = amount;
+        cardDiv.id = code;
+        cardDiv.innerHTML = `<p>${name}</p>
+                             <p>${code}</p>
+                             <p>${amount}</p>
+                             <div class = "combination"></div>
+                             <p class="winner-message"></p>`;
+        shuffle();
+        // let ticket = {
+        //     code: code,
+        //     combination: new Array(new Array(3)),
+        // }
+
+        let combination = cardDiv.querySelector(".combination");
+        let counter = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let number = document.createElement("div");
+                number.classList.add("number");
+                number.innerHTML = numbers[counter++];
+                // ticket.combination[i][j] = numbers[counter++];
+                number.dataset.i = i;
+                number.dataset.j = j;
+                combination.appendChild(number);
+            }
+        }
+        let cardContainer = document.getElementById("cardContainer");
+        cardContainer.appendChild(cardDiv);
+        // tickets.push(ticket);
+        winningAmount += parseInt(amount);
+        return cardDiv;
+    }
+
+    function drawNumber() {
+        if (cards.length < 2) {
+            alert("You need at least two tickets to play");
+            return;
+        }
+        let addBtn = document.getElementById("addBtn");
+        if (addBtn.disabled == false) {
+            shuffle();
+            drawNums = [...numbers];
+            addBtn.disabled = true;
+        }
+
+        let ball = document.createElement("div")
+        ball.classList.add("ball");
+        let drawn = drawNums.shift()
+        ball.innerHTML = String(drawn);
+        let ballsContainer = document.getElementById("ballsContainer");
+        ballsContainer.appendChild(ball);
+        let remaining = document.getElementById("remaining");
+        remaining.innerHTML = String(drawNums.length);
+        for (let i = 0; i < cards.length; i++) {
+            let cardDiv = cards[i];
+            let divs = cardDiv.querySelectorAll(".number");
+            for (let j = 0; j < 9; j++) {
+                if (parseInt(divs[j].innerHTML) == drawn) {
+                    divs[j].style.backgroundColor = "lightgreen";
+                }
+            }
+        }
+
+        checkWinner();
+
+
+    }
+
+    function checkWinner() {
+        let winners = [];
+
+        for (let k = 0; k < cards.length; k++) {
+            let cardDiv = cards[k];
+            let divs = cardDiv.querySelectorAll(".number");
+
+            let rows = [0, 0, 0];
+            let cols = [0, 0, 0];
+            let diagonal = 0;
+            let antiDiagonal = 0;
+
+            for (let i = 0; i < divs.length; i++) {
+                if (divs[i].style.backgroundColor === "lightgreen") {
+
+                    let row = parseInt(divs[i].dataset.i);
+                    let col = parseInt(divs[i].dataset.j);
+
+                    rows[row]++;
+                    cols[col]++;
+
+                    if (row === col) {
+                        diagonal++;
+                    }
+
+                    if (row + col === 2) {
+                        antiDiagonal++;
+                    }
+                }
+            }
+
+            if (rows.includes(3) ||
+                cols.includes(3) ||
+                diagonal === 3 ||
+                antiDiagonal === 3) {
+
+                winners.push(cardDiv);
+            }
+        }
+
+        if (winners.length > 0) {
+            document.getElementById("drawBtn").disabled = true;
+
+            let prize = winningAmount / winners.length;
+
+            for (let i = 0; i < winners.length; i++) {
+                winners[i].style.border = "3px solid gold";
+
+                winners[i].querySelector(".winner-message").innerHTML =
+                    "BINGO! Prize: " + prize;
+            }
+        }
+    }
+
+</script>
+</body>
+</html>
