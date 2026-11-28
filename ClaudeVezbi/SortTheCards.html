@@ -1,0 +1,305 @@
+<!--Да се направи веб-страница за игра во која играчот треба да ги подреди картичките растечки по вредност. Во горниот дел на веб-страницата се внесуваат податоци за картичката и тоа: име, код, вредност и од падачка листа се избира боја (red, green, blue, orange). При кликнување на копчето Add, ако сите полиња се пополнети, во делот „Картички“ се додава нова картичка, а полињата не се ресетираат (10 поени). Ако не се внесени сите полиња се печати порака за грешка (5 поени). Пред да се додаде картичката треба да се провери дали кодот има точно 4 знаци, од кои првите два се големи букви, а последните два цифри (на пример AB12), дали кодот е слободен и дали вредноста е цел број од 1 до 99 што никоја друга картичка не ја користи (15 поени). Со клик на копчето Start game (дозволено кога има најмалку 5 и најмногу 10 картички) формата се сокрива, картичките се мешаат по случаен редослед и се прикажуваат во еден ред; доколку по мешањето случајно се веќе подредени, се мешаат повторно (15 поени). Со клик на картичка таа се обележува со дебела црна рамка; со повторен клик обележувањето се симнува. Истовремено не смеат да бидат обележани повеќе од две картички (15 поени). Копчето Swap е активно само кога се обележани точно две картички. Со негов клик картичките си ги разменуваат местата (и во низата и на екран), обележувањата се симнуваат, а бројачот на потези се зголемува за еден (15 поени). Над картичките постојано се прикажуваат бројот на потези и бројот на картички кои веќе се на свое место, според растечки редослед (5 поени). Кога сите картичките ќе бидат подредени, сите стануваат зелени, Swap се оневозможува и се печати порака со освоени поени, пресметани како 100 − 5 × бројот на потези (не помалку од 0) (15 поени). Изгледот на страницата да одговара на скицата во прилог (5 поени).
+[Name][Code][Value][Color ▼] [Add] [Start game]
+Потези: 3   На свое место: 2 / 6      [Swap]
+┌────┐┌────┐┌────┐┌────┐┌────┐┌────┐
+│ 42 ││ 7  ││ 19 ││ 88 ││ 3  ││ 61 │   ← обележаните имаат рамка
+│AB12││CD34││EF56││GH78││IJ90││KL11│
+└────┘└────┘└────┘└────┘└────┘└────┘-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            width: 250px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            min-height: 100px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="name">Name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="value">Value: </label>
+        <input type="text" id="value">
+    </div>
+    <div class="row">
+        <label for="color">Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="orange">Orange</option>
+        </select>
+    </div>
+
+    <button id="addBtn" onclick="addCard()">Add</button>
+    <button id="startBtn" onclick="startGame()">Start Game</button>
+</div>
+<div id="statistics" style="display: none">
+    <p>Moves: <span id="totalMoves">0</span></p>
+    <p>Correctly placed: <span id="totalCorrectlyPlaced">0</span></p>
+    <button id="swapBtn" onclick="swapCards()" disabled>Swap</button>
+</div>
+<div id="cardContainer">
+
+</div>
+<h1 style="display: none; margin: 10px auto" id="winner"></h1>
+
+
+<script>
+
+    let cards = [];
+    let numbers = [];
+    let moves = 0;
+    let correctlyPlaced = 0;
+    let card1 = undefined;
+    let card2 = undefined;
+
+    function addCard() {
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let value = document.getElementById("value").value;
+        let color = document.getElementById("color").value;
+
+        if (name == "" || code == "" || value == "" || color == "") {
+            alert("Please fill out the form!");
+            return;
+        }
+
+        if (document.getElementById(code) || !/^[A-Z]{2}[0-9]{2}$/.test(code)) {
+            alert("Please enter a valid code!");
+            return;
+        }
+
+        if (!Number.isInteger(Number(value)) || !(Number(value) >= 1 && Number(value) <= 99)) {
+            alert("Please enter a valid value!");
+            return;
+        }
+
+        for (let i = 0; i < cards.length; i++) {
+            if (Number(cards[i].dataset.value) == Number(value)) {
+                alert("Value already exists!");
+                return;
+            }
+        }
+
+        let cardDiv = createCard(name, code, value, color);
+        cards.push(cardDiv);
+        numbers.push(cardDiv);
+        numbers.sort((a, b) => a.dataset.value - b.dataset.value);
+        updateCards();
+
+    }
+
+    function createCard(name, code, value, color) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.id = code;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.value = value;
+        cardDiv.dataset.color = color;
+
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+<p>Code: ${cardDiv.dataset.code}</p>
+<p>Value: ${cardDiv.dataset.value}</p>
+<p>Color: ${cardDiv.dataset.color}</p>`;
+
+        cardDiv.style.backgroundColor = color;
+
+
+        return cardDiv;
+    }
+
+    function updateCards() {
+        let cardContainer = document.getElementById("cardContainer");
+        cardContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardContainer.appendChild(cards[i]);
+        }
+        checkCorrectlyPlaced();
+    }
+
+    function startGame() {
+        if (!(cards.length >= 5 && cards.length <= 10)) {
+            alert("You need 5 to 10 cards to play the game");
+            return;
+        }
+        let form = document.getElementById("form");
+        form.style.display = "none";
+
+        let alreadySorted = true;
+
+        do {
+            shuffle(cards);
+            alreadySorted = true;
+            console.log("shuffling cards...");
+            console.log(cards);
+            console.log(numbers);
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i] != numbers[i]) {
+                    alreadySorted = false;
+                }
+            }
+        } while (alreadySorted === true);
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].setAttribute("onclick", "selectCard(this)");
+        }
+        updateCards();
+
+        let statistics = document.getElementById("statistics");
+        statistics.style.display = "block";
+        updateStatistics();
+    }
+
+    function updateStatistics() {
+        let totalMoves = document.getElementById("totalMoves");
+        let totalCorrectlyPlaced = document.getElementById("totalCorrectlyPlaced");
+        totalMoves.innerHTML = String(moves);
+        checkCorrectlyPlaced();
+        totalCorrectlyPlaced.innerHTML = `${correctlyPlaced}/${cards.length}`;
+    }
+
+    function selectCard(card) {
+        if (card1 == undefined) {
+            if (card2 != undefined) {
+                document.getElementById("swapBtn").disabled = false;
+            }
+            if(card2 == card){
+                alert("Almost! Select another one!");
+                return;
+            }
+            card1 = card;
+            card1.style.border = "5px solid gold";
+            updateCards();
+            return;
+        }
+        if (card == card1) {
+            card1.style.border = "1px solid black";
+            card1 = undefined;
+            document.getElementById("swapBtn").disabled = true;
+            updateCards();
+            return;
+        }
+        if (card == card2) {
+            card2.style.border = "1px solid black";
+            card2 = undefined;
+            document.getElementById("swapBtn").disabled = true;
+            updateCards();
+            return;
+        }
+        if (card2 == undefined) {
+            card2 = card;
+            card2.style.border = "5px solid gold";
+            updateCards();
+            document.getElementById("swapBtn").disabled = false;
+        } else {
+            alert("You can select only 2 cards per turn. Click one of the selected cards if you want to unselect them!");
+            return;
+        }
+    }
+
+    function swapCards() {
+        if (card1 == undefined || card2 == undefined) {
+            alert("You need to select two cards to swap them!");
+            return;
+        }
+        moves++;
+        let card1index = -1;
+        let card2index = -1;
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.code == card1.dataset.code) {
+                card1index = i;
+            }
+            if (cards[i].dataset.code == card2.dataset.code) {
+                card2index = i;
+            }
+        }
+
+        [cards[card1index], cards[card2index]] = [cards[card2index], cards[card1index]];
+        card1.style.border = "1px solid black";
+        card2.style.border = "1px solid black";
+        updateCards();
+        updateStatistics();
+        card1 = undefined;
+        card2 = undefined;
+        document.getElementById("swapBtn").disabled = true;
+        if (correctlyPlaced == cards.length) {
+            let swapBtn = document.getElementById("swapBtn");
+            swapBtn.disabled = true;
+            let winner = document.getElementById("winner");
+            winner.style.display = "block";
+            let points = 100 - 5 * moves;
+            points = (points < 0 ? 0 : points);
+            winner.innerHTML = `WINNER! YOU GOT ${points} POINTS!`;
+            for (let i = 0; i < cards.length; i++) {
+                cards[i].style.backgroundColor = "lightgreen";
+                cards[i].setAttribute("onclick", "");
+            }
+            updateCards();
+        }
+
+    }
+
+    function checkCorrectlyPlaced() {
+        let counter = 0;
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i] == numbers[i]) {
+                counter++;
+            }
+        }
+        correctlyPlaced = counter;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+
+</script>
+</body>
+</html>

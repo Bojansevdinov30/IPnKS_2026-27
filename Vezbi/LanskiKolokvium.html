@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        #form {
+            margin-right: 100px;
+        }
+
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 150px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+            height: 250px;
+            border: 1px solid black;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        #upperDiv {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            margin: 50px;
+        }
+
+        #luckyNumberContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        #picker {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="upperDiv">
+    <div id="form">
+        <h1>Lucky Numbers</h1>
+        <div class="row">
+            <label for="name">Name:</label>
+            <input type="text" id="name">
+        </div>
+        <div class="row">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount">
+        </div>
+        <div class="row">
+            <label for="luckyNumber">Lucky Number:</label>
+            <input type="text" id="luckyNumber">
+        </div>
+        <div class="row">
+            <label for="rank">Rank:</label>
+            <select id="rank">
+                <option value="above">Above</option>
+                <option value="below">Below</option>
+            </select>
+        </div>
+        <button id="addBtn" onclick="addTicket()">Add Ticket</button>
+    </div>
+
+    <div id="picker">
+        <button id="startBtn" onclick="startGame()">Start</button>
+        <p>Lucky Number: </p>
+        <div id="luckyNumberContainer">
+
+        </div>
+    </div>
+</div>
+<div id="cardContainer">
+
+</div>
+
+
+<script>
+
+    let cards = [];
+    let rounds = 0;
+
+    function addTicket() {
+        let name = document.getElementById("name").value;
+        let amount = document.getElementById("amount").value;
+        let luckyNumber = document.getElementById("luckyNumber").value;
+        let rank = document.getElementById("rank").value;
+
+        if (name == "" || amount == "" || luckyNumber == "" || rank == "") {
+            alert("Please fill out the form");
+            return;
+        }
+
+        if (!/^[a-z02468]+$/.test(name) || document.getElementById(name)) {
+            alert("Please enter a valid name!")
+            return;
+        }
+
+        let cardDiv = createCard(name, amount, luckyNumber, rank);
+        cards.push(cardDiv);
+        updateCards();
+
+    }
+
+    function createCard(name, amount, luckyNumber, rank) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+
+        cardDiv.id = name;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.amount = amount;
+        cardDiv.dataset.luckyNumber = luckyNumber;
+        cardDiv.dataset.rank = rank;
+
+        if (parseInt(luckyNumber) % 2 === 0) {
+            cardDiv.style.backgroundColor = "lightgreen";
+        } else {
+            cardDiv.style.backgroundColor = "lightblue";
+        }
+
+        cardDiv.innerHTML = `<p>Name: ${name}</p>
+<p>Amount: <span class="amount">${amount}</span></p>
+<p>Lucky Number: ${luckyNumber}</p>
+<p>Rank: ${rank}</p>`;
+
+        return cardDiv;
+
+
+    }
+
+    function updateCards() {
+        let cardContainer = document.getElementById("cardContainer");
+        cardContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardContainer.appendChild(cards[i]);
+        }
+
+
+    }
+
+    function startGame() {
+        rounds++;
+        let lucky = Math.floor(Math.random() * 100) + 1;
+        let luckyNumberContainer = document.getElementById("luckyNumberContainer");
+        luckyNumberContainer.innerHTML = lucky;
+
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.luckyNumber == lucky) {
+                cards.splice(i, 1);
+                i--;
+            }
+        }
+
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.rank == "above" && cards[i].dataset.luckyNumber < lucky) {
+                cards[i].dataset.amount = parseInt(cards[i].dataset.amount) - 20;
+            } else if (cards[i].dataset.rank == "above" && cards[i].dataset.luckyNumber > lucky) {
+                cards[i].dataset.amount = parseInt(cards[i].dataset.amount) + 20;
+            } else if (cards[i].dataset.rank == "below" && cards[i].dataset.luckyNumber > lucky) {
+                cards[i].dataset.amount = parseInt(cards[i].dataset.amount) - 20;
+            } else if (cards[i].dataset.rank == "below" && cards[i].dataset.luckyNumber < lucky) {
+                cards[i].dataset.amount = parseInt(cards[i].dataset.amount) + 20;
+            }
+
+            let amount = cards[i].querySelector(".amount");
+            amount.innerHTML = cards[i].dataset.amount;
+
+        }
+        updateCards();
+
+        if (rounds == 3) {
+            document.getElementById("startBtn").disabled = true;
+            let maxAmount = -1;
+            let maxIndex = -1;
+            for (let i = 0; i < cards.length; i++) {
+                if (parseInt(cards[i].dataset.amount) > maxAmount) {
+                    maxAmount = cards[i].dataset.amount;
+                    maxIndex = i;
+                }
+            }
+
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i].dataset.amount != maxAmount) {
+                    cards.splice(i, 1);
+                    i--;
+                }
+            }
+
+            updateCards();
+        }
+
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        #cardsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100px;
+            flex-direction: row;
+        }
+
+        .card {
+            width: 250px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid black;
+            margin: 15px;
+            padding: 10px;
+        }
+
+    </style>
+
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="username">Username: </label>
+        <input type="text" id="username">
+    </div>
+    <div class="row">
+        <label for="id">ID: </label>
+        <input type="text" id="id">
+    </div>
+    <div class="row">
+        <label for="width">Width: </label>
+        <input type="text" id="width">
+    </div>
+    <div class="row">
+        <label for="height">Height: </label>
+        <input type="text" id="height">
+    </div>
+    <div class="row">
+        <label for="color">Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+        </select>
+    </div>
+
+    <button id="addBtn" onclick="addCard()">Add Card</button>
+</div>
+
+<p>Total sold: <span id="totalSold">0</span></p>
+<div id="cardsContainer">
+
+</div>
+
+<script>
+
+    let cards = [];
+    let sold = 0;
+
+    function addCard() {
+        let name = document.getElementById("username").value;
+        let id = document.getElementById("id").value;
+        let width = document.getElementById("width").value;
+        let height = document.getElementById("height").value;
+        let color = document.getElementById("color");
+        color = color.value;
+        console.log(color);
+
+        if (name == "" || id == "" || width == "" || height == "" || color == "") {
+            alert("Please fill out the form!");
+            return;
+        }
+
+        if (!/^[^0-9A-Z]+$/.test(id)) {
+            alert("Please enter a valid ID!");
+            return;
+        }
+
+        width = Number(width);
+        height = Number(height);
+        if (!(width >= 1 && width <= 500) || !(height >= 1 && height <= 500)) {
+            alert("Please enter valid height and width!");
+            return;
+        }
+
+        if (document.getElementById(id)) {
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i].dataset.id == id) {
+                    cards.splice(i, 1, createCard(name, id, width, height, color));
+                    updateCards();
+                    return;
+                }
+            }
+        }
+
+        let cardDiv = createCard(name, id, width, height, color);
+        cards.push(cardDiv);
+        updateCards();
+    }
+
+    function createCard(name, id, width, height, color) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.id = id;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.id = id;
+        cardDiv.dataset.color = color;
+        cardDiv.dataset.width = width;
+        cardDiv.dataset.height = height;
+        cardDiv.style.backgroundColor = color;
+        cardDiv.style.width = width + "px";
+        cardDiv.style.height = height + "px";
+
+        let price = width * height * 0.5;
+        if (color == "red") {
+            price += 1000;
+        }
+        cardDiv.dataset.price = String(price);
+
+        cardDiv.innerHTML = `<p>Name: ${name}</p>
+<p>ID: ${id}</p>
+<p>Color: ${color}</p>
+<p>Width: ${width}</p>
+<p>Height: ${height}</p>
+<p>Price: ${price}</p>
+<button onclick="sell(this)">Sell</button>`;
+
+        return cardDiv;
+
+    }
+
+    function sell(button){
+        let cardDiv = button.parentElement;
+        sold += parseInt(cardDiv.dataset.price);
+        for (let i = 0; i < cards.length; i++) {
+            if(cards[i].dataset.id == cardDiv.dataset.id) {
+                cards.splice(i, 1);
+                break;
+            }
+        }
+        updateCards();
+    }
+
+    function updateCards() {
+        let cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardsContainer.appendChild(cards[i]);
+        }
+
+        let totalSold = document.getElementById("totalSold");
+        totalSold.innerHTML = String(sold);
+
+    }
+
+</script>
+</body>
+</html>
