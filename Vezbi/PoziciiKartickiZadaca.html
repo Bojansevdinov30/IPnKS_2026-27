@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+            height: 250px;
+            border: 1px solid black;
+            padding: 10px;
+            margin: 15px;
+        }
+
+        .circle {
+            border-radius: 100%;
+        }
+
+        .square {
+            border-radius: 0;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+
+    </style>
+</head>
+<body>
+<h1>Random Game</h1>
+<div id="form">
+    <h2>Register Card</h2>
+    <div class="row">
+        <label for="name">Name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="amount">Amount: </label>
+        <input type="text" id="amount">
+    </div>
+    <div class="row">
+        <label for="color">Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+            <option value="pink">Pink</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="shape">Shape: </label>
+        <select id="shape">
+            <option value="circle">Circle</option>
+            <option value="square">Square</option>
+        </select>
+    </div>
+    <button onclick="addCard()">Add Card</button>
+</div>
+
+<h2>Game Cards</h2>
+<button id="startBtn" onclick="startGame()">Start Game</button>
+<h3 id="totalCostContainer" style="display: none">Total Cost: <span id="totalCost">0</span></h3>
+
+<div id="cardContainer">
+
+</div>
+
+
+<script>
+
+    let cards = [];
+    let positions = [];
+    let moves = 0;
+
+    function addCard() {
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let amount = document.getElementById("amount").value;
+        let color = document.getElementById("color").value;
+        let shape = document.getElementById("shape").value;
+
+        if (name == "" || code == "" || amount == "" || color == "" || shape == "") {
+            alert("Please fill out all the fields in the form");
+            return;
+        }
+
+        if (!/^[A-Z!@$%^*()\-_=+/?.,<>;:'"{}\[\]|\\`~]+$/.test(code)) {
+            alert("Please enter valid code");
+            return;
+        }
+
+        let cardDiv = createCard(name, code, amount, color, shape);
+        cards.push(cardDiv);
+        updateCards();
+
+
+    }
+
+    function createCard(name, code, amount, color, shape) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.id = code;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.amount = amount;
+        cardDiv.dataset.color = color;
+        cardDiv.dataset.shape = shape;
+
+        cardDiv.style.backgroundColor = cardDiv.dataset.color;
+        if (cardDiv.dataset.shape == "circle") {
+            cardDiv.classList.remove("square");
+            cardDiv.classList.add("circle");
+        } else {
+            cardDiv.classList.remove("circle");
+            cardDiv.classList.add("square");
+        }
+
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+                             <p>Code: ${cardDiv.dataset.code}</p>
+                             <p>Value: ${cardDiv.dataset.amount}</p>`;
+
+        return cardDiv;
+    }
+
+    function updateCards() {
+        let cardContainer = document.getElementById("cardContainer");
+        cardContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].dataset.position = String(i);
+            cardContainer.appendChild(cards[i]);
+        }
+
+        if(document.getElementById("startBtn").style.display === "none"){
+            checkWinner();
+        }
+    }
+
+    function startGame() {
+        let form = document.getElementById("form");
+        form.style.display = "none";
+        let startBtn = document.getElementById("startBtn");
+        startBtn.style.display = "none";
+        let totalCostContainer = document.getElementById("totalCostContainer");
+        totalCostContainer.style.display = "block";
+
+        for (let i = 0; i < cards.length; i++) {
+            positions[i] = i;
+        }
+        shuffle(positions);
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].dataset.desiredPosition = positions[i];
+            cards[i].dataset.desiredShape = (Math.random() > 0.5 ? "circle" : "square");
+            cards[i].innerHTML += `<p>Position: ${cards[i].dataset.desiredPosition}</p>
+                                   <p>Shape: ${cards[i].dataset.desiredShape}</p>
+                                   <div><button onclick="moveLeft(this)"><</button><button onclick="moveRight(this)">></button></div>
+                                   <button onclick="changeShape(this)">Change Shape</button>`;
+        }
+
+        updateCards();
+
+    }
+
+    function moveLeft(button) {
+        let card = button.parentElement.parentElement;
+        if (card.dataset.position == "0") {
+            moves++;
+            return;
+        }
+        let position = parseInt(card.dataset.position);
+
+        moves++;
+        [cards[position - 1], cards[position]] = [cards[position], cards[position - 1]];
+        updateCards();
+    }
+
+    function moveRight(button) {
+        let card = button.parentElement.parentElement;
+        if (card.dataset.position == String(cards.length - 1)) {
+            moves++;
+            return;
+        }
+        let position = parseInt(card.dataset.position);
+
+        moves++;
+        [cards[position], cards[position + 1]] = [cards[position + 1], cards[position]];
+        updateCards();
+    }
+
+    function changeShape(button) {
+        let card = button.parentElement;
+        if (card.dataset.shape == "circle") {
+            card.dataset.shape = "square";
+            card.classList.add("square");
+            card.classList.remove("circle");
+        } else {
+            card.dataset.shape = "circle";
+            card.classList.add("circle");
+            card.classList.remove("square");
+        }
+        moves++;
+        updateCards();
+
+
+    }
+
+    function checkWinner(){
+        console.log("Inside CHECK_WINNER")
+        let totalCost = document.getElementById("totalCost");
+        let total = 0;
+        let totalAmount = 0;
+        for (let i = 0; i < cards.length; i++) {
+            let card = cards[i];
+            let error = Math.abs(card.dataset.desiredPosition - card.dataset.position) * 50 + ((card.dataset.shape === card.dataset.desiredShape) ? 0 : 1) * 30;
+            console.log(error);
+            total += error;
+            totalAmount += parseInt(card.dataset.amount);
+        }
+
+        if(total == 0){
+            alert("WINNER!");
+            totalCost.innerHTML = String(totalAmount - moves * 10);
+        }else{
+            totalCost.innerHTML = String(total);
+        }
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+</script>
+</body>
+</html>

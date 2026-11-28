@@ -1,0 +1,368 @@
+<!--Да се направи веб-страница за продавница. Во горниот дел се внесуваат производи и тоа: име (од 3 до 12 знаци), цена (број поголем од 0, до 2 децимали) и залиха (цел број од 1 до 20). Име на производ може да се внесе само еднаш; ако веќе постои, неговата залиха се зголемува за внесената вредност и цената се ажурира (15 поени). Со клик на Add Product се создава картичка во делот „Каталог“ со име, цена и залиха, а полињата се ресетираат (10 поени). Ако некое поле е невалидно, под формата се печати порака (5 поени). Секоја картичка има копче Add to cart. Ако производот го нема во табелата „Кошничка“ (колони: име, количина, збир, акции), се додава нов ред со количина 1 (15 поени). Ако веќе постои, неговата количина се зголемува за 1, но не повеќе од залихата на картичката (во спротивно alert) (15 поени). Секој ред има копчиња + и − за промена на количината (минимум 1) (10 поени) и копче Remove кое го брише редот (5 поени). Под табелата се прикажува вкупната сума, која се ажурира при секоја промена (10 поени). Со клик на Checkout се печати alert со сметка (име x количина за секој ред и вкупно), залихата на картичките се намалува за купените количини, а кошничката се празни (10 поени). Картичка чија залиха е 0 се обојува сива и нејзиното копче се оневозможува (5 поени). Изгледот на страницата да одговара на скицата во прилог.
+[Name][Price][Stock] [Add Product]
+Каталог:   [ Milk 60 · залиха 5 [Add to cart] ]   [ Bread 30 · залиха 0 (сива) ]
+Кошничка:
+| Milk | 2 [+][−] | 120 | [Remove] |
+Вкупно: 120                                   [Checkout]-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid black;
+            background-color: white;
+        }
+
+        #catalog {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            min-height: 100px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 15px;
+        }
+
+        th, td, tr {
+            border: 1px solid black;
+            padding: 5px;
+            background-color: lightgray;
+        }
+
+        #shoppingCart {
+            min-height: 100px;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Finki Market</h1>
+<h2>Product Form</h2>
+<div id="form">
+    <div class="row">
+        <label for="name">Name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="price">Price: </label>
+        <input type="text" id="price">
+    </div>
+    <div class="row">
+        <label for="stock">Stock: </label>
+        <input type="text" id="stock">
+    </div>
+    <button id="addBtn" onclick="addProduct()">Add product</button>
+</div>
+<h2>Catalog</h2>
+<div id="catalog">
+
+</div>
+<h2>Shopping Cart</h2>
+<div id="shoppingCart">
+    <table id="shoppingCartTable">
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Actions</th>
+        </tr>
+        <tbody id="shoppingCartItems">
+
+        </tbody>
+    </table>
+    <p>Total cost: <span id="totalCost">0</span></p>
+</div>
+<button onclick="checkout()">Checkout</button>
+<h2>Receipt</h2>
+<div id="receipt">
+    <ul id="receiptList">
+
+    </ul>
+    <p style="display: none">Total: <span id = "finalTotal">0</span></p>
+</div>
+
+<script>
+
+    let products = [];
+    let rows = [];
+    let lis = [];
+    let total = 0;
+
+    function addProduct() {
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let stock = document.getElementById("stock").value;
+
+        if (name == "" || price == "" || stock == "") {
+            alert("Please fill out the form");
+            return;
+        }
+
+        if (!(name.length >= 3 && name.length <= 12) || !/^[^0-9]+$/.test(name)) {
+            alert("Please enter a valid name");
+            return;
+        }
+
+        if (!(price > 0) || (price.split(".").length > 1 && price.split(".")[1].length > 2)) {
+            alert("Please enter a valid price");
+            return;
+        }
+
+        if (!Number.isInteger(Number(stock)) || !(stock >= 1 && stock <= 20)) {
+            alert("Please enter a valid stock");
+            return;
+        }
+
+        if (document.getElementById(name)) {
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].dataset.name == name) {
+                    products.splice(i, 1, createCard(name, price, stock));
+                    updateCards();
+                    return;
+                }
+            }
+        }
+
+        let cardDiv = createCard(name, price, stock);
+        products.push(cardDiv);
+        updateCards();
+
+    }
+
+    function createCard(name, price, stock) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.id = name;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.price = price;
+        cardDiv.dataset.stock = stock;
+
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+<p>Price: ${cardDiv.dataset.price}</p>
+<p>Stock: <span class="itemStock">${cardDiv.dataset.stock}</span></p>
+<button onclick="addToCart(this)">Add to Cart</button>`;
+
+        return cardDiv;
+
+
+    }
+
+    function updateCards() {
+        let catalog = document.getElementById("catalog");
+        catalog.innerHTML = "";
+        for (let i = 0; i < products.length; i++) {
+            catalog.appendChild(products[i]);
+        }
+
+
+    }
+
+    function addToCart(button) {
+        let cardDiv = button.parentElement;
+        if (cardDiv.dataset.stock == 0) {
+            alert("Out of stock for this product");
+            return;
+        }
+        let table = document.getElementById("shoppingCartTable");
+        cardDiv.dataset.stock = String(parseInt(cardDiv.dataset.stock) - 1);
+        console.log(cardDiv.dataset.stock);
+        let itemStock = cardDiv.getElementsByClassName("itemStock")[0];
+        itemStock.innerHTML = "";
+        itemStock.innerHTML = cardDiv.dataset.stock;
+        if (table.querySelector(`.${cardDiv.dataset.name}`)) {
+            let row = table.querySelector(`.${cardDiv.dataset.name}`);
+            row.dataset.quantity = Number(parseInt(row.dataset.quantity)) + 1;
+            row.dataset.price = Number(parseInt(row.dataset.price)) + Number(cardDiv.dataset.price);
+            row.innerHTML = "";
+            row.innerHTML = `<td>${row.dataset.name}</td>
+                             <td>${row.dataset.quantity}<button onclick="increaseQuantity(this)">+</button><button onclick="decreaseQuantity(this)">-</button></td>
+                             <td>${row.dataset.price}</td>
+                             <td><button onclick="remove(this)">Remove</button></td>`;
+            row.classList.add(cardDiv.dataset.name);
+            for (let i = 0; i < rows.length; i++) {
+
+                if (rows[i].className == cardDiv.dataset.name) {
+                    rows.splice(i, 1, row);
+                    updateRows();
+                    break;
+                }
+            }
+        } else {
+            let row = document.createElement("tr");
+            row.innerHTML = "";
+            row.innerHTML = `<td>${cardDiv.dataset.name}</td>
+                             <td>1<button onclick="increaseQuantity(this)">+</button><button onclick="decreaseQuantity(this)">-</button></td>
+                             <td>${cardDiv.dataset.price}</td>
+                             <td><button onclick="remove(this)">Remove</button></td>`;
+            row.classList.add(cardDiv.dataset.name);
+            row.dataset.name = cardDiv.dataset.name;
+            row.dataset.price = cardDiv.dataset.price;
+            row.dataset.quantity = "1";
+            rows.push(row);
+            updateRows();
+        }
+        if (parseInt(cardDiv.dataset.stock) === 0) {
+            cardDiv.style.backgroundColor = "lightgray";
+        } else {
+            cardDiv.style.backgroundColor = "white";
+        }
+
+
+        updateCards();
+    }
+
+    function updateRows() {
+        let items = document.getElementById("shoppingCartItems");
+        items.innerHTML = "";
+        let total = 0;
+        for (let i = 0; i < rows.length; i++) {
+            items.appendChild(rows[i]);
+            total += Number(rows[i].dataset.price);
+        }
+
+        let totalCost = document.getElementById("totalCost");
+        totalCost.innerHTML = "";
+        totalCost.innerHTML = String(total);
+
+    }
+
+    function remove(button) {
+        let row = button.parentElement.parentElement;
+        console.log(row.dataset.name);
+        console.log(row.dataset.quantity);
+        console.log(row);
+        let cardDiv = document.getElementById(row.dataset.name);
+        console.log(cardDiv.dataset.name);
+        console.log(row.dataset.quantity);
+        console.log(cardDiv.dataset.stock);
+        cardDiv.dataset.stock = parseInt(cardDiv.dataset.stock) + parseInt(row.dataset.quantity);
+        let itemStock = cardDiv.getElementsByClassName("itemStock")[0];
+        itemStock.innerHTML = "";
+        itemStock.innerHTML = cardDiv.dataset.stock;
+
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].dataset.name == row.dataset.name) {
+                rows.splice(i, 1);
+            }
+        }
+        if (parseInt(cardDiv.dataset.stock) === 0) {
+            cardDiv.style.backgroundColor = "lightgray";
+        } else {
+            cardDiv.style.backgroundColor = "white";
+        }
+
+        updateCards();
+        updateRows();
+    }
+
+    function decreaseQuantity(button) {
+        let row = button.parentElement.parentElement;
+        let cardDiv = document.getElementById(row.dataset.name);
+        if (row.dataset.quantity == 1) {
+            remove(button);
+            return;
+        }
+        cardDiv.dataset.stock = parseInt(cardDiv.dataset.stock) + 1;
+        row.dataset.quantity = parseInt(row.dataset.quantity) - 1;
+        let itemStock = cardDiv.getElementsByClassName("itemStock")[0];
+        itemStock.innerHTML = "";
+        itemStock.innerHTML = cardDiv.dataset.stock;
+
+        row.dataset.price = Number(parseInt(row.dataset.price)) - Number(cardDiv.dataset.price);
+        row.innerHTML = "";
+        row.innerHTML = `<td>${row.dataset.name}</td>
+                             <td>${row.dataset.quantity}<button onclick="increaseQuantity(this)">+</button><button onclick="decreaseQuantity(this)">-</button></td>
+                             <td>${row.dataset.price}</td>
+                             <td><button onclick="remove(this)">Remove</button></td>`;
+        if (parseInt(cardDiv.dataset.stock) === 0) {
+            cardDiv.style.backgroundColor = "lightgray";
+        } else {
+            cardDiv.style.backgroundColor = "white";
+        }
+        updateRows();
+        updateCards();
+
+
+    }
+
+    function increaseQuantity(button) {
+        let row = button.parentElement.parentElement;
+        let cardDiv = document.getElementById(row.dataset.name);
+        if (cardDiv.dataset.stock == 0) {
+            alert("Out of stock for this product!");
+            return;
+        }
+        cardDiv.dataset.stock = parseInt(cardDiv.dataset.stock) - 1;
+        row.dataset.quantity = parseInt(row.dataset.quantity) + 1;
+        let itemStock = cardDiv.getElementsByClassName("itemStock")[0];
+        itemStock.innerHTML = "";
+        itemStock.innerHTML = cardDiv.dataset.stock;
+
+        row.dataset.price = Number(parseInt(row.dataset.price)) + Number(cardDiv.dataset.price);
+        row.innerHTML = "";
+        row.innerHTML = `<td>${row.dataset.name}</td>
+                             <td>${row.dataset.quantity}<button onclick="increaseQuantity(this)">+</button><button onclick="decreaseQuantity(this)">-</button></td>
+                             <td>${row.dataset.price}</td>
+                             <td><button onclick="remove(this)">Remove</button></td>`;
+        if (parseInt(cardDiv.dataset.stock) === 0) {
+            cardDiv.style.backgroundColor = "lightgray";
+        } else {
+            cardDiv.style.backgroundColor = "white";
+        }
+        updateRows();
+        updateCards();
+
+    }
+
+    function checkout() {
+        total += Number(document.getElementById("totalCost").innerHTML);
+        document.getElementById("totalCost").innerHTML = 0;
+        let receiptList = document.getElementById("receiptList");
+        receiptList.innerHTML = "";
+        for (let i = 0; i < lis.length; i++) {
+            receiptList.appendChild(lis[i]);
+        }
+        for (let i = 0; i < rows.length; i++) {
+            let li = document.createElement("li");
+            li.innerHTML = `${rows[i].dataset.name}: ${rows[i].dataset.quantity}, ${rows[i].dataset.price}`;
+            lis.push(li);
+            receiptList.appendChild(li);
+        }
+        rows = [];
+        let finalTotal = document.getElementById("finalTotal");
+        if(finalTotal.parentElement.style.display === "none") {
+            finalTotal.parentElement.style.display = "block";
+        }
+        finalTotal.innerHTML = total;
+        updateCards();
+        updateRows();
+    }
+
+</script>
+</body>
+</html>

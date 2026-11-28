@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .ball {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            height: 30px;
+            width: 30px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid black;
+        }
+
+        #upperContainer {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            flex-direction: row;
+        }
+
+        .combinationContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        #cardsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex-direction: row;
+        }
+
+        #ballsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        #form, #lottery {
+            margin: 50px;
+        }
+
+        .card {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+            width: 400px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+
+    </style>
+</head>
+<body>
+<h1>National Lottery Game</h1>
+<div id="upperContainer">
+    <div id="form">
+        <h2>Assign Form</h2>
+        <div class="row">
+            <label for="name">Name: </label>
+            <input type="text" id="name">
+        </div>
+        <div class="row">
+            <label for="amount">Ticket amount: </label>
+            <input type="text" id="amount">
+        </div>
+        <div class="row">
+            <label for="code">Code: </label>
+            <input type="text" id="code">
+        </div>
+        <div class="row">
+            <label for="combination">Combination: </label>
+            <input type="text" id="combination">
+        </div>
+        <div class="row">
+            <label for="bonus">Bonus: </label>
+            <select id="bonus">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+        <button onclick="addCard()">Add</button>
+    </div>
+    <div id="lottery">
+        <h2>Lucky Numbers</h2>
+        <div id="ballsContainer">
+
+        </div>
+        <button onclick="getWeeklyCombination()">Get weekly combination</button>
+        <p>Total win: <span id="totalWin">0</span></p>
+    </div>
+
+</div>
+<div id="cardsContainer">
+
+</div>
+
+<script>
+    let cards = [];
+    let numbers = [];
+    for (let i = 0; i < 31; i++) {
+        numbers[i] = i + 1
+    }
+
+    let weeklyDrawn = false;
+
+    function addCard() {
+        let name = document.getElementById("name").value;
+        let amount = document.getElementById("amount").value;
+        let code = document.getElementById("code").value;
+        let combination = document.getElementById("combination").value;
+        let bonus = document.getElementById("bonus").value;
+
+        if (name == "" || amount == "" || code == "" || combination == "" || bonus == "") {
+            alert("Please fill out the form")
+            return;
+        }
+
+        if (document.getElementById(code) || !/^[^0-9!%]+$/.test(code)) {
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if (isNaN(Number(amount)) || Number(amount) <= 0) {
+            alert("Please enter a valid amount");
+            return;
+        }
+
+        let combinationList = combination.split(",").map(x => parseInt(x));
+        if (!checkCombination(combinationList)) {
+            alert("Please enter a valid combination");
+            return;
+        }
+
+        let cardDiv = createCard(name, amount, code, combination, bonus);
+        cards.push(cardDiv);
+        updateCards();
+
+    }
+
+    function checkCombination(combinationList) {
+
+        if (combinationList.length !== 7) {
+            return false;
+        }
+
+        for (let i = 0; i < combinationList.length; i++) {
+
+            if (isNaN(combinationList[i]) ||
+                combinationList[i] < 1 ||
+                combinationList[i] > 31) {
+                return false;
+            }
+
+            for (let j = i + 1; j < combinationList.length; j++) {
+                if (combinationList[i] === combinationList[j]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function createCard(name, amount, code, combination, bonus) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        cardDiv.id = code;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.amount = amount;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.combination = combination;
+        cardDiv.dataset.bonus = bonus;
+
+        let combinationList = combination.split(",");
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+                             <p>Code: ${cardDiv.dataset.code}</p>
+                             <div>Combination: <div class="combinationContainer"></div></div>
+                             <p>Initial Amount: ${cardDiv.dataset.amount}</p>`;
+
+        let combinationContainer = cardDiv.getElementsByClassName("combinationContainer")[0];
+        for (let i = 0; i < combinationList.length; i++) {
+            let ball = document.createElement("div");
+            ball.classList.add("ball");
+            ball.innerHTML = combinationList[i];
+            combinationContainer.appendChild(ball);
+        }
+
+
+        return cardDiv;
+    }
+
+    function updateCards() {
+        let cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardsContainer.appendChild(cards[i]);
+        }
+
+        if (weeklyDrawn == true) {
+            checkWinners();
+        }
+
+    }
+
+
+    function getWeeklyCombination() {
+        if (cards.length < 5) {
+            alert("You need at least 5 combinations!")
+            return;
+        }
+
+        shuffle(numbers);
+        let weekly = numbers.slice(0, 7);
+        console.log(weekly);
+        let ballsContainer = document.getElementById("ballsContainer");
+        ballsContainer.innerHTML = "";
+        for (let i = 0; i < weekly.length; i++) {
+            let ball = document.createElement("div");
+            ball.style.backgroundColor = generateRandomColor();
+            ball.classList.add("ball");
+            ball.innerHTML = weekly[i];
+            ballsContainer.appendChild(ball);
+        }
+        weeklyDrawn = true;
+        checkWinners();
+    }
+
+    function checkWinners() {
+        let total = 0;
+        let weekly = numbers.slice(0, 7);
+        for (let i = 0; i < cards.length; i++) {
+            let counter = 0;
+            let combinationList = cards[i].dataset.combination.split(",").map(x => parseInt(x));
+            console.log(combinationList);
+            for (let j = 0; j < 7; j++) {
+                for (let k = 0; k < 7; k++) {
+                    if (combinationList[j] === weekly[k]) {
+                        counter++;
+                    }
+                }
+            }
+
+            if (counter <= 3) {
+                cards[i].style.backgroundColor = "lightyellow";
+            } else if (counter <= 5) {
+                cards[i].style.backgroundColor = "lightblue";
+            } else {
+                cards[i].style.backgroundColor = "lightgreen";
+            }
+
+            if (cards[i].getElementsByClassName("totalWin").length === 0) {
+                cards[i].innerHTML += `<p>Total win: <span class = "totalWin"></span></p>
+                                       <button onclick="getPaid(this)">Get paid</button>`;
+            }
+            let totalWin = cards[i].getElementsByClassName("totalWin")[0];
+            let profit = parseInt(cards[i].dataset.amount) + counter * 30 + (cards[i].dataset.bonus === "yes" ? 500 : 0);
+            totalWin.innerHTML = String(profit);
+            total += profit;
+        }
+
+        let totalWin = document.getElementById("totalWin");
+        totalWin.innerHTML = String(total);
+
+    }
+
+    function getPaid(button) {
+        let code = button.parentElement.dataset.code;
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.code == code) {
+                cards.splice(i, 1);
+                break;
+            }
+        }
+        updateCards();
+    }
+
+    function generateRandomColor() {
+        return "#" +
+            Math.floor(Math.random() * 256).toString(16).padStart(2, "0") +
+            Math.floor(Math.random() * 256).toString(16).padStart(2, "0") +
+            Math.floor(Math.random() * 256).toString(16).padStart(2, "0");
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

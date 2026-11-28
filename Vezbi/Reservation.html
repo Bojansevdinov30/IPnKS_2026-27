@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid black;
+            margin: 10px;
+            padding: 10px;
+            flex-direction: column;
+        }
+
+        #cardsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="name">Name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="phone">Phone: </label>
+        <input type="text" id="phone">
+    </div>
+    <div class="row">
+        <label for="number">Number of people: </label>
+        <input type="text" id="number">
+    </div>
+    <div class="row">
+        <label for="time">Time: </label>
+        <input type="text" id="time">
+    </div>
+    <div class="row">
+        <label for="area">Area: </label>
+        <select id="area">
+            <option value="inside">Inside</option>
+            <option value="outside">Outside</option>
+        </select>
+    </div>
+
+    <button id="reserveBtn" onclick="reserve()">Reserve</button>
+</div>
+
+<p>Capacity left: <span id="capacityLeft">40</span></p>
+<div id="cardsContainer">
+
+</div>
+
+<script>
+
+    let cards = [];
+    let capacity = 40;
+
+    function reserve() {
+        let name = document.getElementById("name").value;
+        let phone = document.getElementById("phone").value;
+        let number = document.getElementById("number").value;
+        let time = document.getElementById("time").value;
+        let area = document.getElementById("area").value;
+
+        if (name == "" || phone == "" || number == "" || time == "" || area == "") {
+            alert("Please fill out the form");
+            return;
+        }
+
+        if (document.getElementById(phone) || !/^07[0-9]-[0-9]{3}-[0-9]{3}$/.test(phone)) {
+            alert("please enter a valid phone number");
+            return;
+        }
+
+        if (number.includes(".") || !(number >= 1 && number <= 10)) {
+            alert("Please enter a valid number of people")
+            return;
+        }
+
+        number = parseInt(number);
+        if (capacity - number < 0) {
+            alert("Not enough capacity!");
+            return;
+        }
+
+        if (!/^[0-9]{2}:[0-9]{2}$/.test(time)) {
+            alert("Please enter a valid time (format)");
+            return;
+        }
+
+        let times = time.split(":");
+        if (times[0] == "22" && !(times[1] >= "0" && times[1] <= "30")) {
+            alert("Please enter a valid time (too late)");
+            return;
+        }
+
+        if (!(times[0] >= "12" && times[0] <= "22") || !(times[1] >= "0" && times[1] <= "59")) {
+            alert("Please enter a valid time (numbers)");
+            return;
+        }
+
+        let cardDiv = createCard(name, phone, number, time, area);
+        cards.push(cardDiv);
+
+        updateCards();
+
+    }
+
+    function createCard(name, phone, number, time, area) {
+        let deposit = parseInt(number) * 150;
+        deposit *= (area == "outside" ? 1.2 : 1)
+
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+        capacity -= parseInt(number);
+
+        cardDiv.id = phone;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.phone = phone;
+        cardDiv.dataset.number = number;
+        cardDiv.dataset.time = time;
+        cardDiv.dataset.area = area;
+        cardDiv.dataset.deposit = String(deposit);
+
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+<p>Phone: ${cardDiv.dataset.phone}</p>
+<p>Number of people: ${cardDiv.dataset.number}</p>
+<p>Time: ${cardDiv.dataset.time}</p>
+<p>Area: ${cardDiv.dataset.area}</p>
+<p>Deposit: ${cardDiv.dataset.deposit}</p>
+<div><button onclick="arrived(this)">Arrived</button><button onclick="cancel(this)">Cancel</button></div>`;
+
+        if (area == "outside") {
+            cardDiv.style.backgroundColor = "lightgreen";
+        } else {
+            cardDiv.style.backgroundColor = "lightyellow";
+        }
+
+
+        return cardDiv;
+    }
+
+    function arrived(button) {
+        let card = button.parentElement.parentElement;
+        let btnContainer = button.parentElement;
+        card.style.backgroundColor = "lightgray";
+        btnContainer.style.display = "none";
+    }
+
+    function cancel(button) {
+        let card = button.parentElement.parentElement;
+        capacity += parseInt(card.dataset.number);
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].dataset.phone == card.dataset.phone) {
+                cards.splice(i, 1);
+                break;
+            }
+        }
+        updateCards();
+
+    }
+
+    function updateCards() {
+        let cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardsContainer.appendChild(cards[i]);
+        }
+        let capacityLeft = document.getElementById("capacityLeft");
+        capacityLeft.innerHTML = String(capacity);
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .row {
+            margin: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 300px;
+            height: 300px;
+            border: 1px solid black;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        #cardsContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+<div id="form">
+    <div class="row">
+        <label for="name">Name: </label>
+        <input type="text" id="name">
+    </div>
+    <div class="row">
+        <label for="code">Code: </label>
+        <input type="text" id="code">
+    </div>
+    <div class="row">
+        <label for="points">Points: </label>
+        <input type="text" id="points">
+    </div>
+    <div class="row">
+        <label for="color">Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="orange">Orange</option>
+        </select>
+    </div>
+    <button id="addBtn" onclick="addCard()">Add</button>
+    <button id="startBtn" onclick="startGame()" disabled>Start Game</button>
+</div>
+<p>Points: <span id="totalPoints">0</span></p>
+<p>Moves: <span id="totalMoves">0</span></p>
+<button id="continueBtn">Continue</button>
+<div id="cardsContainer">
+
+</div>
+
+<script>
+
+    let cards = [];
+    let faceDownCards = [];
+    let card1 = undefined;
+    let card2 = undefined;
+    let points = 0;
+    let moves = 0;
+
+    function addCard() {
+        let name = document.getElementById("name").value;
+        let code = document.getElementById("code").value;
+        let points = document.getElementById("points").value;
+        let color = document.getElementById("color").value;
+
+        if (name == "" || code == "" || points == "" || color == "") {
+            alert("Please fill out the form");
+            return;
+        }
+
+        if (document.getElementById(code) || !/^[A-Z]{3}$/.test(code)) {
+            alert("Please enter a valid code");
+            return;
+        }
+
+        if (!Number.isInteger(Number(points)) || !(Number(points) >= 1 && Number(points) <= 50)) {
+            alert("Please enter a valid number of points");
+            return;
+        }
+
+        let cardDiv = createCard(name, code, points, color);
+        cards.push(cardDiv);
+        faceDownCards.push(cardDiv);
+        cardDiv = createCard(name, code, points, color);
+        faceDownCards.push(cardDiv);
+        updateCards(cards);
+    }
+
+    function createCard(name, code, points, color) {
+        let cardDiv = document.createElement("div");
+        cardDiv.classList.add("card");
+
+        cardDiv.id = code;
+        cardDiv.dataset.name = name;
+        cardDiv.dataset.code = code;
+        cardDiv.dataset.points = points;
+        cardDiv.dataset.color = color;
+
+        cardDiv.innerHTML = `<p>Name: ${cardDiv.dataset.name}</p>
+<p>Code: ${cardDiv.dataset.code}</p>
+<p>Points: ${cardDiv.dataset.points}</p>
+<p>Color: ${cardDiv.dataset.color}</p>`;
+        cardDiv.style.backgroundColor = color;
+
+
+        return cardDiv;
+
+    }
+
+    function updateCards(cards) {
+        let cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardsContainer.appendChild(cards[i]);
+        }
+        if (cards.length >= 4) {
+            let startBtn = document.getElementById("startBtn");
+            startBtn.removeAttribute("disabled");
+        }
+
+
+    }
+
+    function startGame() {
+        let form = document.getElementById("form");
+        form.style.display = "none";
+
+        let continueBtn = document.getElementById("continueBtn");
+        continueBtn.setAttribute("onclick", "continueGame()")
+        shuffle(faceDownCards);
+        for (let i = 0; i < faceDownCards.length; i++) {
+            faceDownCards[i].style.backgroundColor = "lightgray";
+            faceDownCards[i].innerHTML = `<p>?</p>`;
+            faceDownCards[i].setAttribute("onclick", "chooseCard(this)")
+        }
+        updateCards(faceDownCards);
+
+
+    }
+
+    function chooseCard(card) {
+        if (card.innerHTML != `<p>?</p>`) {
+            alert("Choose a face down card");
+            return;
+        }
+        if (card1 != undefined && card2 != undefined) {
+            alert("You must click continue next!")
+            return;
+        }
+        card.innerHTML = `<p>Name: ${card.dataset.name}</p>
+<p>Code: ${card.dataset.code}</p>
+<p>Points: ${card.dataset.points}</p>
+<p>Color: ${card.dataset.color}</p>`;
+        card.style.backgroundColor = card.dataset.color;
+        if (card1 == undefined) {
+            card1 = card;
+        } else {
+            card2 = card;
+        }
+        if(card1 != undefined && card2 != undefined) {
+            if (card1.dataset.code != card2.dataset.code) {
+                card1.style.backgroundColor = "indianred";
+                card2.style.backgroundColor = "indianred";
+                points -= 5;
+            }else{
+                card1.style.backgroundColor = "lightgreen";
+                card2.style.backgroundColor = "lightgreen";
+                points += parseInt(card1.dataset.points);
+            }
+            moves ++;
+        }
+
+        checkWinner();
+    }
+
+    function continueGame() {
+        if (card1 == undefined || card2 == undefined) {
+            alert("Choose 2 cards to continue");
+            return;
+        }
+        if (card1.dataset.code != card2.dataset.code) {
+            card1.style.backgroundColor = "lightgray";
+            card1.innerHTML = `<p>?</p>`;
+            card2.style.backgroundColor = "lightgray";
+            card2.innerHTML = `<p>?</p>`;
+
+        }
+        updateCards(faceDownCards);
+        card1 = undefined;
+        card2 = undefined;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+    function checkWinner(){
+        let totalPoints = document.getElementById("totalPoints");
+        totalPoints.innerHTML = String(points);
+        let totalMoves = document.getElementById("totalMoves");
+        totalMoves.innerHTML = String(moves);
+        updateCards(faceDownCards);
+        for (let i = 0; i < faceDownCards.length; i++) {
+            if(faceDownCards[i].innerHTML == `<p>?</p>`){
+                return;
+            }
+        }
+
+        alert(`WE HAVE A WINNER! TOTAL POINTS: ${points}, MOVES: ${moves}`);
+        for (let i = 0; i < faceDownCards.length; i++) {
+            faceDownCards[i].setAttribute("onclick", "");
+        }
+    }
+
+
+</script>
+</body>
+</html>
